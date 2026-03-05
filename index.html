@@ -1,0 +1,1529 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#D7A0B3" />
+  <title>霧粉奶茶｜讀書計時</title>
+  <link rel="manifest" href="./manifest.json" />
+  <style>
+    :root{
+      /* Pinkier palette */
+      --bg:#FFF6FA;        /* very light pink */
+      --card:#FFFFFF;
+      --ink:#2B2B2B;
+      --muted:#6D6A6A;
+      --line:#F0DDE6;      /* pink line */
+      --accent:#D7A0B3;    /* rosy */
+      --accent2:#C58E8A;   /* milk tea */
+      --accent3:#F1C9D6;   /* soft pink */
+      --shadow:0 10px 30px rgba(43,43,43,.08);
+      --shadow2:0 6px 18px rgba(43,43,43,.06);
+      --radius:18px;
+      --tap:52px;
+      --font: ui-rounded, system-ui, -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--font);color:var(--ink);min-height:100vh;
+      background:
+        radial-gradient(900px 340px at 10% -5%, rgba(241,201,214,.55), rgba(255,246,250,0) 60%),
+        radial-gradient(900px 340px at 90% 0%, rgba(213,160,179,.32), rgba(255,246,250,0) 55%),
+        linear-gradient(180deg, rgba(213,160,179,.10), rgba(197,142,138,.06) 40%, rgba(255,246,250,1));
+    }
+    header{position:sticky;top:0;z-index:10;backdrop-filter:saturate(1.2) blur(10px);
+      background:rgba(255,246,250,.82);border-bottom:1px solid var(--line);padding:14px 16px 10px;}
+    main{padding:14px 16px 86px;max-width:980px;margin:0 auto}
+    .brandRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+    .brand{font-weight:900;font-size:22px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.88);font-size:12px;color:var(--muted);box-shadow:var(--shadow2);white-space:nowrap}
+    .sub{margin-top:4px;color:var(--muted);font-size:13px}
+    .grid{display:grid;gap:12px}
+    .card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow2);padding:14px}
+    h2{margin:0 0 10px 0;font-size:16px}
+    .hint{font-size:12px;color:var(--muted)}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .rowBetween{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    input,select,textarea{width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:#fff;font-family:var(--font);outline:none}
+    textarea{min-height:86px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:rgba(215,160,179,.65);box-shadow:0 0 0 4px rgba(215,160,179,.16)}
+    .btn{min-height:var(--tap);padding:12px 14px;border-radius:16px;border:1px solid rgba(215,160,179,.45);
+      background:linear-gradient(180deg, rgba(215,160,179,.26), rgba(215,160,179,.14));
+      color:var(--ink);font-weight:900;cursor:pointer;box-shadow:var(--shadow2)}
+    .btn.secondary{border-color:var(--line);background:rgba(255,255,255,.92);font-weight:800}
+    .btn.danger{border-color:rgba(192,81,81,.32);background:linear-gradient(180deg, rgba(192,81,81,.16), rgba(192,81,81,.08));color:#5A2323}
+    .btn.small{min-height:40px;padding:10px 12px;border-radius:14px;font-weight:800}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.88);font-size:12px;color:var(--muted)}
+    .kpi{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px;border-radius:16px;
+      background:rgba(241,201,214,.35); border:1px solid rgba(215,160,179,.18)}
+    .kpi .big{font-size:22px;font-weight:900}
+    .kpi .small{font-size:12px;color:var(--muted)}
+    .list{display:grid;gap:10px}
+    .item{padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.92);box-shadow:var(--shadow2)}
+    .itemTitle{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .meta{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.5}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chipTag{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.90);font-size:12px;color:var(--muted);white-space:nowrap}
+    .cover{width:44px;height:58px;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.06);background:rgba(240,221,230,.65);flex:0 0 auto}
+    .cover img{width:100%;height:100%;object-fit:cover}
+    .dot{width:10px;height:10px;border-radius:4px;border:1px solid rgba(0,0,0,.06);display:inline-block}
+    .starRow{display:flex;gap:6px;align-items:center}
+    .star{cursor:pointer;font-size:18px;user-select:none}
+    .tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:50;width:min(980px, calc(100% - 16px));
+      background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:10px;
+      display:grid;grid-template-columns:repeat(5,1fr);gap:10px;backdrop-filter:blur(12px)}
+    .tabBtn{border:1px solid var(--line);background:rgba(255,246,250,.88);border-radius:18px;padding:10px 8px;min-height:58px;cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-weight:900;user-select:none}
+    .tabBtn strong{font-size:13px}
+    .tabBtn span{font-size:16px}
+    .tabBtn.active{background:linear-gradient(180deg, rgba(215,160,179,.28), rgba(215,160,179,.14));border-color:rgba(215,160,179,.42);color:var(--ink)}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;z-index:100;background:rgba(43,43,43,.92);color:#fff;
+      padding:10px 12px;border-radius:14px;max-width:min(640px, calc(100% - 26px));font-size:13px;box-shadow:var(--shadow);
+      opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+    .modalMask{position:fixed;inset:0;background:rgba(43,43,43,.35);display:none;z-index:120;padding:18px 16px}
+    .modal{max-width:760px;margin:0 auto;background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+    .modalHead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,246,250,.88)}
+    .modalBody{padding:14px;max-height:calc(80vh - 80px);overflow:auto}
+    .progress{height:12px;border-radius:999px;background:rgba(240,221,230,.75);overflow:hidden;border:1px solid var(--line)}
+    .progress>div{height:100%;width:0%;background:linear-gradient(90deg, rgba(215,160,179,.88), rgba(197,142,138,.78));border-radius:999px}
+    canvas{width:100%;height:300px;border-radius:16px;background:rgba(255,255,255,.78);border:1px solid var(--line)}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px}
+    .calCell{border:1px solid var(--line);background:rgba(255,255,255,.90);border-radius:14px;padding:8px;min-height:68px;cursor:pointer}
+    .calCell .d{font-size:12px;color:var(--muted);font-weight:900}
+    .dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+    .topRightTest{position:absolute;right:12px;top:12px;z-index:20}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .legend .chipTag{cursor:default}
+    .toggleRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .smallNote{font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brandRow">
+      <div class="brand">霧粉奶茶｜讀書計時 <span class="chip" id="verChip">v3.1 full</span></div>
+      <span class="chip" id="storageChip">—</span>
+    </div>
+    <div class="sub">可愛再粉一點 ✅ 功能都加回來（統計/堆疊/排行榜/分類/封面/匯入匯出/目標）。</div>
+  </header>
+
+  <main>
+    <button class="btn secondary small topRightTest" id="btnTest">點我測試</button>
+
+    <!-- Today -->
+    <section id="view-today" class="grid">
+      <div class="card">
+        <h2>今天</h2>
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <label>選擇書籍</label>
+            <select id="todayBook"></select>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>日期</label>
+            <input id="todayDate" type="date" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn" id="btnStart">▶️ 開始</button>
+          <button class="btn secondary" id="btnPause" disabled>⏸ 暫停</button>
+          <button class="btn secondary" id="btnStop" disabled>⏹ 結束並存檔</button>
+        </div>
+        <div class="rowBetween" style="margin-top:10px;">
+          <div class="pill">⏱️ <strong id="timerText">00:00:00</strong></div>
+          <button class="btn secondary small" id="btnManualToday">✍️ 手動新增（幾點到幾點）</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>今日摘要</h2>
+        <div class="kpi">
+          <div>
+            <div class="small">今天累積</div>
+            <div class="big" id="todayTotal">0m</div>
+          </div>
+          <div class="chip" id="todayScope">—</div>
+        </div>
+        <div class="list" id="todaySessions" style="margin-top:10px;"></div>
+        <div class="hint" id="todayEmpty" style="display:none;">今天還沒有紀錄。可以先新增一本書，然後開始計時～</div>
+      </div>
+    </section>
+
+    <!-- Books -->
+    <section id="view-books" class="grid" style="display:none;">
+      <div class="card">
+        <div class="rowBetween">
+          <h2>書庫</h2>
+          <div class="row">
+            <button class="btn secondary small" id="btnExport">⬇️ 匯出</button>
+            <button class="btn secondary small" id="btnImport">⬆️ 匯入</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn" id="btnAddBook">➕ 新增書籍</button>
+          <button class="btn secondary" id="btnManageCategories">🏷️ 分類管理</button>
+        </div>
+        <div class="hint" style="margin-top:8px;">書籍顏色會用在統計堆疊圖表；封面照片會存到本機（可匯出匯入）。</div>
+      </div>
+      <div class="card">
+        <h2>我的書</h2>
+        <div class="list" id="bookList"></div>
+        <div class="hint" id="bookEmpty" style="display:none;">目前還沒有書籍。按「新增書籍」開始建立你的閱讀宇宙 ✨</div>
+      </div>
+    </section>
+
+    <!-- Logs -->
+    <section id="view-logs" class="grid" style="display:none;">
+      <div class="card">
+        <h2>紀錄</h2>
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <label>日期</label>
+            <input id="logsDate" type="date" />
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>操作</label>
+            <button class="btn secondary" id="btnManualLog" style="width:100%;">➕ 手動新增一筆</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>當日清單</h2>
+        <div class="list" id="logList"></div>
+        <div class="hint" id="logEmpty" style="display:none;">這天沒有紀錄。</div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="view-stats" class="grid" style="display:none;">
+      <div class="card">
+        <h2>統計</h2>
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <label>年份</label>
+            <select id="statsYear"></select>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>月份</label>
+            <input id="statsMonth" type="month" />
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>模式</label>
+            <select id="statsMode">
+              <option value="year">年（每月）</option>
+              <option value="month">月（每日）</option>
+              <option value="week">週（週一～週日）</option>
+              <option value="day24">日（24小時分布）</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div style="flex:1; min-width:220px;">
+            <label>週 / 日 參考日期（只在 週 / 24小時 模式顯示）</label>
+            <input id="statsAnchorDate" type="date" />
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>堆疊顯示</label>
+            <select id="stackFilter">
+              <option value="all">全部書籍</option>
+              <option value="top5">前 5 名，其餘合併成「其他」</option>
+              <option value="top10">前 10 名，其餘合併成「其他」</option>
+              <option value="custom">自選書籍</option>
+            </select>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>自選（可選）</label>
+            <button class="btn secondary" id="btnPickBooks" style="width:100%;">🎨 選擇要顯示的書</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div style="flex:1; min-width:220px;">
+            <label>月目標（小時）</label>
+            <input id="monthlyGoal" type="number" min="0" step="0.5" placeholder="例如 20" />
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>本月進度</label>
+            <div class="progress"><div id="goalBar"></div></div>
+            <div class="hint" id="goalText" style="margin-top:6px;">—</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <div class="kpi" style="flex:1; min-width:220px;">
+            <div><div class="small">本模式總計</div><div class="big" id="modeTotal">0m</div></div>
+            <div class="chip" id="modeLabel">—</div>
+          </div>
+          <div class="kpi" style="flex:1; min-width:220px;">
+            <div><div class="small">閱讀方式</div><div class="big" id="mediumTotal">—</div></div>
+            <div class="chip">紙本/電子/聽書</div>
+          </div>
+        </div>
+
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div class="card">
+        <h2>圖表（依書籍顏色堆疊）</h2>
+        <canvas id="chart" width="980" height="340"></canvas>
+        <div class="hint" id="chartHint" style="margin-top:8px;">—</div>
+      </div>
+
+      <div class="card">
+        <h2>月曆打卡</h2>
+        <div class="hint">顏色點點＝你那天讀到的書（依書籍顏色）。點一天可跳到紀錄。</div>
+        <div class="calendar" id="calendar"></div>
+      </div>
+    </section>
+
+    <!-- Rank -->
+    <section id="view-rank" class="grid" style="display:none;">
+      <div class="card">
+        <h2>排行榜（喜愛度）</h2>
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <label>年份</label>
+            <select id="rankYear"></select>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label>月份</label>
+            <select id="rankMonth">
+              <option value="all">全年</option>
+              <option value="01">1 月</option><option value="02">2 月</option><option value="03">3 月</option>
+              <option value="04">4 月</option><option value="05">5 月</option><option value="06">6 月</option>
+              <option value="07">7 月</option><option value="08">8 月</option><option value="09">9 月</option>
+              <option value="10">10 月</option><option value="11">11 月</option><option value="12">12 月</option>
+            </select>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:10px;">依星等分組（5→1）。每本書會顯示該期間閱讀時間，方便選「月/年度最愛」。</div>
+      </div>
+
+      <div class="card">
+        <h2>榜單</h2>
+        <div class="list" id="rankList"></div>
+        <div class="hint" id="rankEmpty" style="display:none;">目前沒有書籍。</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs" id="tabs">
+    <button class="tabBtn active" data-view="today"><strong>今日</strong><span>⏱️</span></button>
+    <button class="tabBtn" data-view="books"><strong>書庫</strong><span>📚</span></button>
+    <button class="tabBtn" data-view="logs"><strong>紀錄</strong><span>🧾</span></button>
+    <button class="tabBtn" data-view="stats"><strong>統計</strong><span>📊</span></button>
+    <button class="tabBtn" data-view="rank"><strong>排行榜</strong><span>🏆</span></button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modalMask" id="modalMask">
+    <div class="modal">
+      <div class="modalHead">
+        <div style="font-weight:900;" id="modalTitle">—</div>
+        <button class="btn secondary small" id="modalClose">✕</button>
+      </div>
+      <div class="modalBody" id="modalBody"></div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   Utilities
+========================= */
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+function toast(msg){
+  const el=$("#toast");
+  el.textContent=msg;
+  el.classList.add("show");
+  clearTimeout(window.__toastT);
+  window.__toastT=setTimeout(()=>el.classList.remove("show"), 2200);
+}
+function escapeHTML(str){return String(str||"").replace(/[&<>"']/g,s=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[s]));}
+function pad2(n){ return String(n).padStart(2,"0"); }
+function toISODate(d){ const x=new Date(d); x.setHours(0,0,0,0); return `${x.getFullYear()}-${pad2(x.getMonth()+1)}-${pad2(x.getDate())}`; }
+function minutesToHM(m){ const min=Math.max(0, Math.round(m||0)); const h=Math.floor(min/60); const mm=min%60; return h<=0?`${mm}m`:`${h}h ${mm}m`; }
+function clamp(n,a,b){ return Math.min(b, Math.max(a,n)); }
+function weekStartMonday(dateStr){
+  const d=new Date(dateStr+"T00:00:00");
+  const day=(d.getDay()+6)%7; // Mon=0..Sun=6
+  d.setDate(d.getDate()-day);
+  return toISODate(d);
+}
+function addDays(dateStr, delta){
+  const d=new Date(dateStr+"T00:00:00");
+  d.setDate(d.getDate()+delta);
+  return toISODate(d);
+}
+function monthStart(year,month){ return `${year}-${pad2(month)}-01`; }
+function daysInMonth(year,month){ return new Date(year,month,0).getDate(); } // month 1..12
+function parseMonthValue(v){ // "YYYY-MM"
+  const [y,m]=String(v||"").split("-").map(Number);
+  return {y:y||new Date().getFullYear(), m:m||new Date().getMonth()+1};
+}
+function normalizeHexToRGBA(c){
+  if(!c) return null;
+  const s=String(c).trim();
+  if(!s.startsWith("#")) return s;
+  let hex=s.slice(1);
+  if(hex.length===3) hex=hex.split("").map(ch=>ch+ch).join("");
+  if(hex.length===6) hex+="FF";
+  if(hex.length!==8) return s;
+  const r=parseInt(hex.slice(0,2),16);
+  const g=parseInt(hex.slice(2,4),16);
+  const b=parseInt(hex.slice(4,6),16);
+  const a=parseInt(hex.slice(6,8),16)/255;
+  return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+}
+
+/* =========================
+   Storage (IDB + LS fallback)
+========================= */
+const APP_VER="3.1";
+const DB_NAME="reading_timer_pwa_v3"; const DB_VERSION=1;
+let db=null; let storageMode="ls";
+const LS_KEYS={
+  books:"rtpwa_v3_books",sessions:"rtpwa_v3_sessions",meta:"rtpwa_v3_meta",
+  nextBookId:"rtpwa_v3_nextBookId",nextSessionId:"rtpwa_v3_nextSessionId",timer:"rtpwa_v3_timer"
+};
+function lsLoad(key, fallback){ try{ const raw=localStorage.getItem(key); return raw?JSON.parse(raw):fallback; }catch(e){ return fallback; } }
+function lsSave(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+function lsNextId(key){ const cur=Number(localStorage.getItem(key)||1); localStorage.setItem(key, String(cur+1)); return cur; }
+
+function idbOpen(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded=()=>{
+      const d=req.result;
+      if(!d.objectStoreNames.contains("books")) d.createObjectStore("books",{keyPath:"id"});
+      if(!d.objectStoreNames.contains("sessions")) d.createObjectStore("sessions",{keyPath:"id"});
+      if(!d.objectStoreNames.contains("meta")) d.createObjectStore("meta",{keyPath:"key"});
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+function idbTx(store, mode="readonly"){ return db.transaction([store], mode).objectStore(store); }
+function idbGetAll(store){ return new Promise((res,rej)=>{ const r=idbTx(store).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); }); }
+function idbPut(store, value){ return new Promise((res,rej)=>{ const r=idbTx(store,"readwrite").put(value); r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error); }); }
+function idbClear(store){ return new Promise((res,rej)=>{ const r=idbTx(store,"readwrite").clear(); r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error); }); }
+function idbGetMeta(key){ return new Promise((res,rej)=>{ const r=idbTx("meta").get(key); r.onsuccess=()=>res(r.result? r.result.value : null); r.onerror=()=>rej(r.error); }); }
+function idbSetMeta(key,value){ return idbPut("meta",{key,value}); }
+
+async function loadAll(){
+  if(storageMode==="idb"){
+    const books=await idbGetAll("books");
+    const sessions=await idbGetAll("sessions");
+    const metaAll=await idbGetAll("meta");
+    const meta={}; metaAll.forEach(x=>meta[x.key]=x.value);
+    return {books,sessions,meta};
+  }
+  const books=lsLoad(LS_KEYS.books, []);
+  const sessions=lsLoad(LS_KEYS.sessions, []);
+  const meta=lsLoad(LS_KEYS.meta, {});
+  if(!localStorage.getItem(LS_KEYS.nextBookId)) localStorage.setItem(LS_KEYS.nextBookId,"1");
+  if(!localStorage.getItem(LS_KEYS.nextSessionId)) localStorage.setItem(LS_KEYS.nextSessionId,"1");
+  return {books,sessions,meta};
+}
+async function saveAll(){
+  if(storageMode==="idb"){
+    await idbClear("books"); await idbClear("sessions");
+    for(const b of state.books) await idbPut("books", b);
+    for(const s of state.sessions) await idbPut("sessions", s);
+    await idbSetMeta("metaBlob", state.meta); // optional blob
+    return;
+  }
+  lsSave(LS_KEYS.books, state.books);
+  lsSave(LS_KEYS.sessions, state.sessions);
+  lsSave(LS_KEYS.meta, state.meta);
+}
+async function getMeta(key){
+  if(storageMode==="idb"){
+    const v=await idbGetMeta(key);
+    if(v!==null && v!==undefined) return v;
+    // fallback: some older builds stored meta as object in LS or metaBlob
+    const blob=await idbGetMeta("metaBlob");
+    if(blob && typeof blob==="object" && key in blob) return blob[key];
+    return null;
+  }
+  return (state.meta && (key in state.meta)) ? state.meta[key] : null;
+}
+async function setMeta(key,value){
+  if(storageMode==="idb"){ await idbSetMeta(key,value); return; }
+  state.meta[key]=value; lsSave(LS_KEYS.meta, state.meta);
+}
+
+/* =========================
+   State & helpers
+========================= */
+let state={
+  view:"today",
+  books:[],
+  sessions:[],
+  categories:["文學","歷史","財經"],
+  meta:{},
+  stackFilter:"all",
+  selectedBooks:[] // for custom stack
+};
+
+function ensureDefaultBook(){
+  if(state.books.length) return;
+  state.books.push({
+    id:1,title:"（範例）風沙星辰",author:"聖修伯里",publisher:"—",medium:"紙本",
+    purchaseDate:"",startDate:"",endDate:"",
+    rating:5,category:"文學",color:"#4B9A6A",cover:"",status:"閱讀中",notes:""
+  });
+  if(storageMode==="ls") localStorage.setItem(LS_KEYS.nextBookId,"2");
+}
+function nextBookId(){ return storageMode==="ls" ? lsNextId(LS_KEYS.nextBookId) : (Math.max(0,...state.books.map(b=>Number(b.id||0)))+1); }
+function nextSessionId(){ return storageMode==="ls" ? lsNextId(LS_KEYS.nextSessionId) : (Math.max(0,...state.sessions.map(s=>Number(s.id||0)))+1); }
+function getBookById(id){ return state.books.find(b=>String(b.id)===String(id)); }
+function bookColor(id){
+  const b=getBookById(id);
+  return normalizeHexToRGBA(b?.color)||b?.color||"rgba(215,160,179,.75)";
+}
+function bookName(id){ return getBookById(id)?.title || "（已刪除的書）"; }
+
+function refreshBookSelects(){
+  const opts=state.books.slice()
+    .sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"zh-Hant"))
+    .map(b=>`<option value="${b.id}">${escapeHTML(b.title)}</option>`).join("");
+  $("#todayBook").innerHTML = opts || `<option value="">（先去書庫新增書籍）</option>`;
+  $("#todayBook").disabled = !state.books.length;
+}
+
+/* =========================
+   Modal
+========================= */
+function openModal(title, html){ $("#modalTitle").textContent=title; $("#modalBody").innerHTML=html; $("#modalMask").style.display="block"; }
+function closeModal(){ $("#modalMask").style.display="none"; $("#modalBody").innerHTML=""; }
+$("#modalClose").addEventListener("click", closeModal);
+$("#modalMask").addEventListener("click",(e)=>{ if(e.target.id==="modalMask") closeModal(); });
+
+/* =========================
+   Tabs
+========================= */
+function showView(name){
+  state.view=name;
+  ["today","books","logs","stats","rank"].forEach(v=>$("#view-"+v).style.display=(v===name)?"":"none");
+  $$("#tabs .tabBtn").forEach(btn=>btn.classList.toggle("active", btn.dataset.view===name));
+  if(name==="today") renderToday();
+  if(name==="books") renderBooks();
+  if(name==="logs") renderLogs();
+  if(name==="stats") renderStats();
+  if(name==="rank") renderRank();
+}
+$("#tabs").addEventListener("click",(e)=>{ const btn=e.target.closest(".tabBtn"); if(btn) showView(btn.dataset.view); });
+
+/* =========================
+   Timer
+========================= */
+let timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null};
+let tickT=null;
+function loadTimer(){ const saved=lsLoad(LS_KEYS.timer,null); if(saved&&typeof saved==="object") timerState=saved; }
+function saveTimer(){ lsSave(LS_KEYS.timer,timerState); }
+function clearTimer(){ timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null}; lsSave(LS_KEYS.timer,null); }
+function elapsedMs(){
+  if(!timerState.startTs) return 0;
+  const now=Date.now();
+  if(timerState.running) return (now-timerState.startTs)-timerState.pauseAccum;
+  return (timerState.pausedAt-timerState.startTs)-timerState.pauseAccum;
+}
+function fmtHMS(ms){
+  const s=Math.max(0,Math.floor(ms/1000));
+  const hh=String(Math.floor(s/3600)).padStart(2,"0");
+  const mm=String(Math.floor((s%3600)/60)).padStart(2,"0");
+  const ss=String(s%60).padStart(2,"0");
+  return `${hh}:${mm}:${ss}`;
+}
+function updateTimerUI(){ $("#timerText").textContent=fmtHMS(elapsedMs()); }
+function startTick(){ clearInterval(tickT); tickT=setInterval(updateTimerUI,250); }
+function syncTimerButtons(){
+  const hasBook=!!$("#todayBook").value;
+  $("#btnStart").disabled=!hasBook||timerState.running;
+  $("#btnPause").disabled=!timerState.running;
+  $("#btnStop").disabled=!timerState.startTs;
+}
+
+$("#btnStart").addEventListener("click",()=>{
+  const bookId=Number($("#todayBook").value);
+  if(!bookId){ toast("先選一本書"); return; }
+  const date=$("#todayDate").value||toISODate(new Date());
+  if(!timerState.startTs||timerState.bookId!==bookId||timerState.date!==date){
+    timerState={running:true,startTs:Date.now(),pauseAccum:0,pausedAt:null,bookId,date};
+  }else if(!timerState.running){
+    timerState.running=true;
+    timerState.pauseAccum+=(Date.now()-timerState.pausedAt);
+    timerState.pausedAt=null;
+  }
+  saveTimer(); startTick(); updateTimerUI(); syncTimerButtons(); toast("開始計時");
+});
+$("#btnPause").addEventListener("click",()=>{
+  if(!timerState.running) return;
+  timerState.running=false; timerState.pausedAt=Date.now();
+  saveTimer(); syncTimerButtons(); toast("已暫停");
+});
+$("#btnStop").addEventListener("click",async ()=>{
+  if(!timerState.startTs) return;
+  const ms=elapsedMs();
+  const minutes=Math.max(1,Math.round(ms/60000));
+  const startISO=new Date(timerState.startTs).toISOString();
+  const endISO=new Date((timerState.running?Date.now():timerState.pausedAt)).toISOString();
+  state.sessions.push({
+    id:nextSessionId(),
+    date:timerState.date||toISODate(new Date()),
+    bookId:timerState.bookId,
+    startedAt:startISO,
+    endedAt:endISO,
+    durationMinutes:minutes,
+    inputType:"timer"
+  });
+  await saveAll(); clearTimer(); updateTimerUI(); syncTimerButtons(); toast("已存檔");
+  renderToday(); if(state.view==="stats") renderStats();
+});
+
+/* Manual session (time range) */
+function openManualSessionModal(dateStr){
+  if(!state.books.length){ toast("請先新增書籍"); return; }
+  const bookOptions=state.books.map(b=>`<option value="${b.id}">${escapeHTML(b.title)}</option>`).join("");
+  openModal("手動新增（幾點到幾點）",`
+    <div class="grid">
+      <div class="row">
+        <div style="flex:1;min-width:220px;"><label>日期</label><input id="m_date" type="date" value="${escapeHTML(dateStr)}"/></div>
+        <div style="flex:1;min-width:220px;"><label>書籍</label><select id="m_book">${bookOptions}</select></div>
+      </div>
+      <div class="row">
+        <div style="flex:1;min-width:220px;"><label>開始時間</label><input id="m_start" type="time" value="20:00"/></div>
+        <div style="flex:1;min-width:220px;"><label>結束時間</label><input id="m_end" type="time" value="20:30"/></div>
+      </div>
+      <div class="hint">會自動計算分鐘（跨午夜也 OK）。</div>
+      <div class="row"><button class="btn" id="m_save">💾 存檔</button><button class="btn secondary" id="m_cancel">取消</button></div>
+    </div>
+  `);
+  $("#m_cancel").addEventListener("click",closeModal);
+  $("#m_save").addEventListener("click",async ()=>{
+    const date=$("#m_date").value; const bookId=Number($("#m_book").value);
+    const st=$("#m_start").value; const en=$("#m_end").value;
+    if(!date||!st||!en||!bookId){ toast("請填完整"); return; }
+    const [sh,sm]=st.split(":").map(Number); const [eh,em]=en.split(":").map(Number);
+    let start=new Date(date+"T00:00:00"); start.setHours(sh,sm,0,0);
+    let end=new Date(date+"T00:00:00"); end.setHours(eh,em,0,0);
+    if(end<=start) end.setDate(end.getDate()+1);
+    const minutes=Math.max(1,Math.round((end-start)/60000));
+    state.sessions.push({
+      id:nextSessionId(),date,bookId,
+      startedAt:start.toISOString(),endedAt:end.toISOString(),
+      durationMinutes:minutes,inputType:"manual"
+    });
+    await saveAll(); closeModal(); toast("已新增");
+    renderToday(); renderLogs(); if(state.view==="stats") renderStats();
+  });
+}
+$("#btnManualToday").addEventListener("click",()=>openManualSessionModal($("#todayDate").value||toISODate(new Date())));
+
+/* =========================
+   Today view
+========================= */
+function sessionsOnDate(date){
+  return state.sessions
+    .filter(s=>s.date===date)
+    .sort((a,b)=>(a.startedAt||"").localeCompare(b.startedAt||""));
+}
+function renderToday(){
+  refreshBookSelects();
+  const today=$("#todayDate").value||toISODate(new Date());
+  $("#todayDate").value=today;
+
+  if(timerState.startTs){
+    if(timerState.date) $("#todayDate").value=timerState.date;
+    if(timerState.bookId) $("#todayBook").value=String(timerState.bookId);
+  }
+
+  const list=sessionsOnDate($("#todayDate").value);
+  const total=list.reduce((a,s)=>a+(s.durationMinutes||0),0);
+  $("#todayTotal").textContent=minutesToHM(total);
+  $("#todayScope").textContent=$("#todayDate").value;
+
+  const box=$("#todaySessions"); box.innerHTML="";
+  $("#todayEmpty").style.display=list.length? "none":"block";
+
+  list.forEach(s=>{
+    const b=getBookById(s.bookId);
+    const color=bookColor(s.bookId);
+    const st=s.startedAt?new Date(s.startedAt):null;
+    const en=s.endedAt?new Date(s.endedAt):null;
+    const timeTxt=(st&&en)?`${pad2(st.getHours())}:${pad2(st.getMinutes())}–${pad2(en.getHours())}:${pad2(en.getMinutes())}`:"";
+    const el=document.createElement("div");
+    el.className="item";
+    el.innerHTML=`<div class="itemTitle"><div style="display:flex;align-items:center;gap:10px;">
+      <span class="dot" style="background:${color}"></span><div style="font-weight:900;">${escapeHTML(b?.title||"（已刪除的書）")}</div></div>
+      <div style="font-weight:900;">${minutesToHM(s.durationMinutes||0)}</div></div>
+      <div class="meta">${timeTxt} · ${s.inputType==="timer"?"計時":"手動"}</div>
+      <div class="row" style="margin-top:10px;"><button class="btn danger small" data-del="${s.id}">刪除</button></div>`;
+    box.appendChild(el);
+    el.querySelector("[data-del]").addEventListener("click",async ()=>{
+      if(!confirm("刪除這筆紀錄？")) return;
+      state.sessions=state.sessions.filter(x=>x.id!==s.id);
+      await saveAll(); toast("已刪除");
+      renderToday(); renderLogs(); if(state.view==="stats") renderStats();
+    });
+  });
+
+  loadTimer(); updateTimerUI(); syncTimerButtons();
+}
+
+/* =========================
+   Books
+========================= */
+async function compressImageToDataURL(file,maxSize=420,quality=0.82){
+  const img=await new Promise((resolve,reject)=>{
+    const im=new Image();
+    im.onload=()=>resolve(im);
+    im.onerror=reject;
+    im.src=URL.createObjectURL(file);
+  });
+  const w=img.width,h=img.height;
+  const scale=Math.min(1,maxSize/Math.max(w,h));
+  const tw=Math.round(w*scale), th=Math.round(h*scale);
+  const canvas=document.createElement("canvas"); canvas.width=tw; canvas.height=th;
+  const ctx=canvas.getContext("2d"); ctx.drawImage(img,0,0,tw,th);
+  URL.revokeObjectURL(img.src);
+  return canvas.toDataURL("image/jpeg",quality);
+}
+
+function openBookModal(book=null){
+  const isEdit=!!book;
+  const b=book?{...book}:{id:null,title:"",author:"",publisher:"",medium:"紙本",purchaseDate:"",startDate:"",endDate:"",
+    rating:3,category:(state.categories[0]||"文學"),color:"#D7A0B3",cover:"",status:"閱讀中",notes:""};
+  const catOpts=(state.categories.length?state.categories:["文學"]).map(c=>`<option ${b.category===c?"selected":""}>${escapeHTML(c)}</option>`).join("");
+  openModal(isEdit?"編輯書籍":"新增書籍",`
+    <div class="grid">
+      <div class="row">
+        <div style="flex:1;min-width:220px;"><label>書名</label><input id="b_title" value="${escapeHTML(b.title)}"/></div>
+        <div style="flex:1;min-width:220px;"><label>作者</label><input id="b_author" value="${escapeHTML(b.author)}"/></div>
+      </div>
+      <div class="row">
+        <div style="flex:1;min-width:220px;"><label>出版社</label><input id="b_pub" value="${escapeHTML(b.publisher)}"/></div>
+        <div style="flex:1;min-width:220px;"><label>閱讀方式</label>
+          <select id="b_medium">${["紙本","電子書","聽書"].map(x=>`<option ${b.medium===x?"selected":""}>${x}</option>`).join("")}</select>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1;min-width:220px;"><label>購買日期</label><input id="b_buy" type="date" value="${escapeHTML(b.purchaseDate||"")}"/></div>
+        <div style="flex:1;min-width:220px;"><label>開始閱讀</label><input id="b_start" type="date" value="${escapeHTML(b.startDate||"")}"/></div>
+        <div style="flex:1;min-width:220px;"><label>結束閱讀</label><input id="b_end" type="date" value="${escapeHTML(b.endDate||"")}"/></div>
+      </div>
+      <div class="row">
+        <div style="flex:1;min-width:220px;"><label>分類</label><select id="b_cat">${catOpts}</select></div>
+        <div style="flex:1;min-width:220px;"><label>代表顏色</label><input id="b_color" type="color" value="${escapeHTML(b.color||"#D7A0B3")}"/></div>
+        <div style="flex:1;min-width:220px;"><label>狀態</label>
+          <select id="b_status">${["想讀","閱讀中","已讀完","擱置"].map(x=>`<option ${b.status===x?"selected":""}>${x}</option>`).join("")}</select>
+        </div>
+      </div>
+      <div class="rowBetween" style="margin-top:6px;">
+        <div><div class="hint">喜愛程度</div><div class="starRow" id="b_stars"></div></div>
+        <div class="pill">⭐ <strong id="b_rating">${b.rating}</strong></div>
+      </div>
+      <div>
+        <label>封面照片（可選）</label>
+        <input id="b_cover" type="file" accept="image/*" />
+        <div class="row" style="margin-top:10px;align-items:center;">
+          <div class="cover">${b.cover?`<img src="${escapeHTML(b.cover)}" alt="cover"/>`:""}</div>
+          <button class="btn secondary small" id="b_clearcover" ${b.cover?"":"disabled"}>移除封面</button>
+        </div>
+      </div>
+      <div><label>備註</label><textarea id="b_notes">${escapeHTML(b.notes||"")}</textarea></div>
+      <div class="row">
+        <button class="btn" id="b_save">💾 ${isEdit?"儲存":"新增"}</button>
+        ${isEdit?`<button class="btn danger" id="b_delete">🗑 刪除</button>`:""}
+        <button class="btn secondary" id="b_cancel">取消</button>
+      </div>
+    </div>
+  `);
+
+  let rating=clamp(Number(b.rating||3),1,5);
+  let coverData=b.cover||"";
+  function renderStars(){
+    const box=$("#b_stars"); box.innerHTML="";
+    for(let i=1;i<=5;i++){
+      const s=document.createElement("span");
+      s.className="star";
+      s.textContent=(i<=rating)?"★":"☆";
+      s.addEventListener("click",()=>{rating=i; $("#b_rating").textContent=String(rating); renderStars();});
+      box.appendChild(s);
+    }
+    $("#b_rating").textContent=String(rating);
+  }
+  renderStars();
+
+  $("#b_clearcover").addEventListener("click",()=>{coverData=""; $("#b_clearcover").disabled=true; toast("已移除封面（存檔後生效）");});
+  $("#b_cover").addEventListener("change",async (e)=>{
+    const file=e.target.files?.[0]; if(!file) return;
+    try{ coverData=await compressImageToDataURL(file,420,0.82); $("#b_clearcover").disabled=false; toast("封面已選取（存檔後生效）"); }
+    catch(err){ console.error(err); toast("封面讀取失敗"); }
+  });
+  $("#b_cancel").addEventListener("click",closeModal);
+
+  $("#b_save").addEventListener("click",async ()=>{
+    const title=$("#b_title").value.trim(); if(!title){ toast("請輸入書名"); return; }
+    const obj={
+      id:b.id??nextBookId(),title,
+      author:$("#b_author").value.trim(),
+      publisher:$("#b_pub").value.trim(),
+      medium:$("#b_medium").value,
+      purchaseDate:$("#b_buy").value,
+      startDate:$("#b_start").value,
+      endDate:$("#b_end").value,
+      category:$("#b_cat").value,
+      color:$("#b_color").value,
+      status:$("#b_status").value,
+      rating,cover:coverData,
+      notes:$("#b_notes").value.trim()
+    };
+    const idx=state.books.findIndex(x=>String(x.id)===String(obj.id));
+    if(idx>=0) state.books[idx]=obj; else state.books.push(obj);
+    await saveAll(); closeModal(); toast(isEdit?"已儲存":"已新增");
+    refreshBookSelects(); renderBooks();
+    if(state.view==="stats") renderStats();
+    if(state.view==="rank") renderRank();
+  });
+
+  if(isEdit){
+    $("#b_delete").addEventListener("click",async ()=>{
+      if(!confirm("刪除這本書？（不會自動刪掉紀錄，但紀錄會顯示「已刪除的書」）")) return;
+      state.books=state.books.filter(x=>String(x.id)!==String(b.id));
+      await saveAll(); closeModal(); toast("已刪除書籍");
+      refreshBookSelects(); renderBooks();
+      if(state.view==="stats") renderStats();
+      if(state.view==="rank") renderRank();
+    });
+  }
+}
+
+function renderBooks(){
+  $("#bookEmpty").style.display=state.books.length?"none":"block";
+  const box=$("#bookList"); box.innerHTML="";
+  state.books.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"zh-Hant")).forEach(b=>{
+    const el=document.createElement("div");
+    el.className="item";
+    el.innerHTML=`<div class="itemTitle">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="cover">${b.cover?`<img src="${escapeHTML(b.cover)}" alt="cover"/>`:""}</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="dot" style="background:${bookColor(b.id)}"></span>
+            <div style="font-weight:900;">${escapeHTML(b.title)}</div>
+          </div>
+          <div class="meta">${escapeHTML(b.author||"")}${b.publisher?` · ${escapeHTML(b.publisher)}`:""}</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:900;">${"★".repeat(clamp(Number(b.rating||3),1,5))}${"☆".repeat(5-clamp(Number(b.rating||3),1,5))}</div>
+        <div class="meta">${escapeHTML(b.category||"")}</div>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chipTag">狀態：${escapeHTML(b.status||"")}</span>
+      <span class="chipTag">閱讀：${escapeHTML(b.medium||"")}</span>
+    </div>
+    <div class="row" style="margin-top:10px;"><button class="btn secondary small" data-edit="${b.id}">編輯</button></div>`;
+    box.appendChild(el);
+    el.querySelector("[data-edit]").addEventListener("click",()=>openBookModal(b));
+  });
+}
+$("#btnAddBook").addEventListener("click",()=>openBookModal(null));
+
+/* Category manager */
+$("#btnManageCategories").addEventListener("click",async ()=>{
+  const cats=(await getMeta("categories"))||state.categories||["文學","歷史","財經"];
+  const list=Array.isArray(cats)?cats.slice():["文學","歷史","財經"];
+  openModal("分類管理",`
+    <div class="grid">
+      <div class="hint">新增/刪除分類；書籍分類選單會更新。</div>
+      <div class="list" id="catList"></div>
+      <div class="row">
+        <div style="flex:1;min-width:220px;"><label>新增分類</label><input id="catNew" placeholder="例如：心理、科普…"/></div>
+        <div style="display:flex;align-items:flex-end;"><button class="btn" id="catAdd">➕ 加入</button></div>
+      </div>
+      <div class="row"><button class="btn secondary" id="catSave">完成</button></div>
+    </div>
+  `);
+  function render(){
+    const box=$("#catList"); box.innerHTML="";
+    list.forEach((c,idx)=>{
+      const el=document.createElement("div");
+      el.className="item"; el.style.boxShadow="none";
+      el.innerHTML=`<div class="itemTitle"><div style="font-weight:900;">${escapeHTML(c)}</div>
+        <button class="btn danger small" data-del="${idx}">刪除</button></div>`;
+      box.appendChild(el);
+      el.querySelector("[data-del]").addEventListener("click",()=>{ if(confirm(`刪除分類「${c}」？`)){ list.splice(idx,1); render(); } });
+    });
+    if(!list.length){ const em=document.createElement("div"); em.className="hint"; em.textContent="（目前沒有分類）"; box.appendChild(em); }
+  }
+  render();
+  $("#catAdd").addEventListener("click",()=>{ const v=$("#catNew").value.trim(); if(!v) return; if(list.includes(v)){ toast("已存在"); return; } list.push(v); $("#catNew").value=""; render(); });
+  $("#catSave").addEventListener("click",async ()=>{
+    state.categories=list.length?list:["文學","歷史","財經"];
+    await setMeta("categories",state.categories);
+    state.meta.categories=state.categories;
+    await saveAll(); closeModal(); toast("已更新分類");
+  });
+});
+
+/* Export/Import */
+$("#btnExport").addEventListener("click",()=>{
+  const payload={version:APP_VER,exportedAt:new Date().toISOString(),books:state.books,sessions:state.sessions,meta:state.meta};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=`reading_timer_backup_${toISODate(new Date())}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast("已匯出備份");
+});
+$("#btnImport").addEventListener("click",()=>{
+  const input=document.createElement("input");
+  input.type="file"; input.accept="application/json";
+  input.onchange=async ()=>{
+    const file=input.files?.[0]; if(!file) return;
+    try{
+      const data=JSON.parse(await file.text());
+      if(!data||!Array.isArray(data.books)||!Array.isArray(data.sessions)){ toast("不是有效的備份檔"); return; }
+      if(!confirm("匯入會覆蓋目前資料。確定匯入？")) return;
+      state.books=data.books; state.sessions=data.sessions; state.meta=data.meta||{};
+      const cats=state.meta.categories; if(Array.isArray(cats)&&cats.length) state.categories=cats;
+      await saveAll(); toast("匯入完成");
+      refreshBookSelects(); renderBooks(); renderToday(); renderLogs(); renderStats(); renderRank();
+    }catch(err){ console.error(err); toast("匯入失敗"); }
+  };
+  input.click();
+});
+
+/* =========================
+   Logs
+========================= */
+function renderLogs(){
+  const date=$("#logsDate").value||toISODate(new Date());
+  $("#logsDate").value=date;
+  const list=sessionsOnDate(date);
+  $("#logEmpty").style.display=list.length?"none":"block";
+  const box=$("#logList"); box.innerHTML="";
+  list.forEach(s=>{
+    const st=s.startedAt?new Date(s.startedAt):null;
+    const en=s.endedAt?new Date(s.endedAt):null;
+    const timeTxt=(st&&en)?`${pad2(st.getHours())}:${pad2(st.getMinutes())}–${pad2(en.getHours())}:${pad2(en.getMinutes())}`:"";
+    const el=document.createElement("div");
+    el.className="item";
+    el.innerHTML=`<div class="itemTitle"><div style="display:flex;align-items:center;gap:10px;">
+      <span class="dot" style="background:${bookColor(s.bookId)}"></span><div style="font-weight:900;">${escapeHTML(bookName(s.bookId))}</div></div>
+      <div style="font-weight:900;">${minutesToHM(s.durationMinutes||0)}</div></div>
+      <div class="meta">${date} · ${timeTxt} · ${s.inputType==="timer"?"計時":"手動"}</div>
+      <div class="row" style="margin-top:10px;"><button class="btn danger small" data-del="${s.id}">刪除</button></div>`;
+    box.appendChild(el);
+    el.querySelector("[data-del]").addEventListener("click",async ()=>{
+      if(!confirm("刪除這筆紀錄？")) return;
+      state.sessions=state.sessions.filter(x=>x.id!==s.id);
+      await saveAll(); toast("已刪除");
+      renderLogs(); renderToday(); if(state.view==="stats") renderStats();
+    });
+  });
+}
+$("#logsDate").addEventListener("change",renderLogs);
+$("#btnManualLog").addEventListener("click",()=>openManualSessionModal($("#logsDate").value||toISODate(new Date())));
+
+/* =========================
+   Stats
+========================= */
+function getYears(){
+  const years=new Set([new Date().getFullYear()]);
+  state.sessions.forEach(s=>{ const y=Number((s.date||"").slice(0,4)); if(y) years.add(y); });
+  return Array.from(years).sort((a,b)=>b-a);
+}
+
+function sessionsInRange(startDate,endDateExclusive){
+  return state.sessions.filter(s=>s.date>=startDate && s.date<endDateExclusive);
+}
+
+function filterBooksForStack(perBookTotals){
+  // perBookTotals: Map bookId -> minutes
+  const entries=[...perBookTotals.entries()].sort((a,b)=>b[1]-a[1]);
+  if(state.stackFilter==="all") return {bookIds:entries.map(x=>x[0]), others:false};
+  if(state.stackFilter==="custom"){
+    const sel=(state.selectedBooks||[]).map(Number).filter(Boolean);
+    return {bookIds: sel, others:false};
+  }
+  const N = state.stackFilter==="top10" ? 10 : 5;
+  const top=entries.slice(0,N).map(x=>x[0]);
+  return {bookIds: top, others:true};
+}
+
+function computeMediumTotals(sessions){
+  const totals={ "紙本":0, "電子書":0, "聽書":0 };
+  sessions.forEach(s=>{
+    const b=getBookById(s.bookId);
+    const med=b?.medium || "紙本";
+    if(!(med in totals)) totals[med]=0;
+    totals[med]+= (s.durationMinutes||0);
+  });
+  return totals;
+}
+
+function buildLegend(bookIds, includeOthers){
+  const box=$("#legend"); box.innerHTML="";
+  const items=[];
+  for(const id of bookIds){
+    const b=getBookById(id);
+    if(!b) continue;
+    items.push({name:b.title,color:bookColor(id)});
+  }
+  if(includeOthers) items.push({name:"其他",color:"rgba(197,142,138,.65)"});
+  if(!items.length){ box.innerHTML=`<div class="hint">（沒有可顯示的書）</div>`; return; }
+  items.slice(0,18).forEach(it=>{
+    const chip=document.createElement("span");
+    chip.className="chipTag";
+    chip.innerHTML=`<span class="dot" style="background:${it.color}"></span> ${escapeHTML(it.name)}`;
+    box.appendChild(chip);
+  });
+  if(items.length>18){
+    const more=document.createElement("span");
+    more.className="hint";
+    more.textContent=`（還有 ${items.length-18} 本未顯示在圖例）`;
+    box.appendChild(more);
+  }
+}
+
+/* Split session minutes into hour bins for day24 */
+function addSessionToHourBins(session, binsByBook){ 
+  // binsByBook[bookId][hour] += minutes
+  const mins=session.durationMinutes||0;
+  const st=session.startedAt?new Date(session.startedAt):null;
+  const en=session.endedAt?new Date(session.endedAt):null;
+  if(!st || !en || isNaN(st.getTime()) || isNaN(en.getTime()) || en<=st){
+    // fallback: put all in start hour of date
+    const hr=0;
+    (binsByBook[session.bookId] ||= Array(24).fill(0))[hr]+=mins;
+    return;
+  }
+  // clamp to same day window for chart date (we assume session date label is the day)
+  let cur=new Date(st);
+  while(cur < en){
+    const next=new Date(cur);
+    next.setMinutes(0,0,0);
+    next.setHours(cur.getHours()+1);
+    const segEnd = next<en ? next : en;
+    const segMin = Math.max(0, (segEnd-cur)/60000);
+    const hr=cur.getHours();
+    (binsByBook[session.bookId] ||= Array(24).fill(0))[hr]+=segMin;
+    cur=segEnd;
+  }
+}
+
+function drawStackedChart(labels, seriesByBookId, bookOrder, includeOthers, titleHint){
+  const canvas=$("#chart");
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Compute totals per label
+  const totals=labels.map((_,i)=>{
+    let t=0;
+    for(const id of bookOrder){
+      const arr=seriesByBookId[id]||[];
+      t += (arr[i]||0);
+    }
+    if(includeOthers){
+      t += (seriesByBookId["__others__"]?.[i]||0);
+    }
+    return t;
+  });
+  const maxV=Math.max(1, ...totals);
+
+  // Padding
+  const padL=48, padR=18, padT=18, padB=54;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+
+  // Axes & grid
+  ctx.strokeStyle="rgba(109,106,106,.25)";
+  ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+plotH); ctx.lineTo(padL+plotW,padT+plotH); ctx.stroke();
+
+  // Y grid lines
+  const steps=4;
+  ctx.fillStyle="rgba(109,106,106,.75)";
+  ctx.font="12px "+getComputedStyle(document.body).fontFamily;
+  ctx.textAlign="right"; ctx.textBaseline="middle";
+  for(let s=0;s<=steps;s++){
+    const y=padT+plotH-(plotH*(s/steps));
+    ctx.strokeStyle="rgba(109,106,106,.16)";
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+plotW,y); ctx.stroke();
+    const val=Math.round(maxV*(s/steps));
+    ctx.fillText(minutesToHM(val), padL-8, y);
+  }
+
+  // Bars
+  const n=labels.length;
+  const gap=8;
+  const barW = Math.max(10, Math.min(60, (plotW - gap*(n-1)) / n));
+  const actualGap = (plotW - barW*n) / Math.max(1,n-1);
+  const x0=padL;
+  function yFor(v){ return padT + plotH - (v/maxV)*plotH; }
+
+  for(let i=0;i<n;i++){
+    let x = x0 + i*(barW+actualGap);
+    let yBase = padT+plotH;
+    // stacked segments
+    for(const id of bookOrder){
+      const v=(seriesByBookId[id]?.[i]||0);
+      if(v<=0) continue;
+      const h=(v/maxV)*plotH;
+      ctx.fillStyle=bookColor(id);
+      ctx.fillRect(x, yBase-h, barW, h);
+      yBase-=h;
+    }
+    if(includeOthers){
+      const v=(seriesByBookId["__others__"]?.[i]||0);
+      if(v>0){
+        const h=(v/maxV)*plotH;
+        ctx.fillStyle="rgba(197,142,138,.65)";
+        ctx.fillRect(x, yBase-h, barW, h);
+        yBase-=h;
+      }
+    }
+    // x labels
+    ctx.fillStyle="rgba(109,106,106,.85)";
+    ctx.textAlign="center"; ctx.textBaseline="top";
+    const lbl=labels[i];
+    ctx.save();
+    // If too crowded, rotate a bit
+    if(n>12){
+      ctx.translate(x+barW/2, padT+plotH+8);
+      ctx.rotate(-0.55);
+      ctx.fillText(lbl, 0, 0);
+    }else{
+      ctx.fillText(lbl, x+barW/2, padT+plotH+8);
+    }
+    ctx.restore();
+  }
+
+  // Title hint
+  $("#chartHint").textContent=titleHint;
+}
+
+function renderCalendar(year,month){
+  const cal=$("#calendar"); cal.innerHTML="";
+  const weekday=["一","二","三","四","五","六","日"];
+  weekday.forEach(w=>{
+    const head=document.createElement("div");
+    head.className="hint";
+    head.style.textAlign="center";
+    head.textContent=w;
+    cal.appendChild(head);
+  });
+
+  const first=new Date(year,month-1,1);
+  const startDay=(first.getDay()+6)%7; // Mon=0
+  const days=daysInMonth(year,month);
+
+  for(let i=0;i<startDay;i++){
+    const blank=document.createElement("div");
+    blank.style.opacity="0";
+    cal.appendChild(blank);
+  }
+
+  for(let d=1; d<=days; d++){
+    const date=`${year}-${pad2(month)}-${pad2(d)}`;
+    const cell=document.createElement("div"); cell.className="calCell";
+    cell.innerHTML=`<div class="d">${d}</div><div class="dots"></div>`;
+    const dots=cell.querySelector(".dots");
+
+    // distinct books that day
+    const booksToday=[...new Set(sessionsOnDate(date).map(s=>String(s.bookId)))].map(Number);
+    booksToday.slice(0,10).forEach(id=>{
+      const dot=document.createElement("span");
+      dot.className="dot";
+      dot.style.background=bookColor(id);
+      dots.appendChild(dot);
+    });
+    if(booksToday.length>10){
+      const more=document.createElement("span");
+      more.className="hint";
+      more.textContent=`+${booksToday.length-10}`;
+      dots.appendChild(more);
+    }
+
+    cell.addEventListener("click",()=>{
+      $("#logsDate").value=date;
+      showView("logs");
+      renderLogs();
+    });
+    cal.appendChild(cell);
+  }
+}
+
+function renderStats(){
+  // years
+  const years=getYears();
+  $("#statsYear").innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join("");
+  const ySel=Number($("#statsYear").value||years[0]||new Date().getFullYear());
+  $("#statsYear").value=String(ySel);
+
+  // month default
+  if(!$("#statsMonth").value){
+    $("#statsMonth").value=`${new Date().getFullYear()}-${pad2(new Date().getMonth()+1)}`;
+  }
+  if(!$("#statsAnchorDate").value){
+    $("#statsAnchorDate").value=toISODate(new Date());
+  }
+
+  state.stackFilter=$("#stackFilter").value||"all";
+
+  const mode=$("#statsMode").value;
+  // show anchor only for week/day24
+  $("#statsAnchorDate").parentElement.style.display=(mode==="week"||mode==="day24")?"":"none";
+
+  const {y,m}=parseMonthValue($("#statsMonth").value);
+  const anchor=$("#statsAnchorDate").value || toISODate(new Date());
+
+  // Determine period sessions for "mode total" and medium stats
+  let labels=[], seriesByBookId={}, includeOthers=false, bookOrder=[];
+  let modeSessions=[];
+  let modeLabel="—";
+
+  if(mode==="year"){
+    // 12 months of selected year
+    labels=Array.from({length:12},(_,i)=>`${i+1}月`);
+    // sessions within year
+    modeSessions=state.sessions.filter(s=>Number((s.date||"").slice(0,4))===ySel);
+    modeLabel=`${ySel} 年`;
+    // build per book per month
+    const perBookTotals=new Map();
+    modeSessions.forEach(s=>{
+      perBookTotals.set(s.bookId, (perBookTotals.get(s.bookId)||0) + (s.durationMinutes||0));
+    });
+    const filtered=filterBooksForStack(perBookTotals);
+    includeOthers=filtered.others;
+    bookOrder=filtered.bookIds.filter(id=>perBookTotals.get(id)>0);
+
+    // initialize
+    for(const id of bookOrder) seriesByBookId[id]=Array(12).fill(0);
+    if(includeOthers) seriesByBookId["__others__"]=Array(12).fill(0);
+
+    modeSessions.forEach(s=>{
+      const mm=Number((s.date||"").slice(5,7)); if(!mm) return;
+      const idx=mm-1;
+      const mins=(s.durationMinutes||0);
+      if(bookOrder.includes(s.bookId)) seriesByBookId[s.bookId][idx]+=mins;
+      else if(includeOthers) seriesByBookId["__others__"][idx]+=mins;
+    });
+
+  }else if(mode==="month"){
+    // days in selected month
+    const dim=daysInMonth(y,m);
+    labels=Array.from({length:dim},(_,i)=>String(i+1));
+    const start=monthStart(y,m);
+    const end=addDays(start, dim);
+    modeSessions=sessionsInRange(start,end);
+    modeLabel=`${y}-${pad2(m)}（每日）`;
+
+    const perBookTotals=new Map();
+    modeSessions.forEach(s=>{
+      perBookTotals.set(s.bookId, (perBookTotals.get(s.bookId)||0) + (s.durationMinutes||0));
+    });
+    const filtered=filterBooksForStack(perBookTotals);
+    includeOthers=filtered.others;
+    bookOrder=filtered.bookIds.filter(id=>perBookTotals.get(id)>0);
+
+    for(const id of bookOrder) seriesByBookId[id]=Array(dim).fill(0);
+    if(includeOthers) seriesByBookId["__others__"]=Array(dim).fill(0);
+
+    modeSessions.forEach(s=>{
+      const dd=Number((s.date||"").slice(8,10)); if(!dd) return;
+      const idx=dd-1;
+      const mins=(s.durationMinutes||0);
+      if(bookOrder.includes(s.bookId)) seriesByBookId[s.bookId][idx]+=mins;
+      else if(includeOthers) seriesByBookId["__others__"][idx]+=mins;
+    });
+
+  }else if(mode==="week"){
+    // Mon-Sun of anchor date
+    const ws=weekStartMonday(anchor);
+    labels=["一","二","三","四","五","六","日"];
+    const start=ws;
+    const end=addDays(ws,7);
+    modeSessions=sessionsInRange(start,end);
+    modeLabel=`週：${ws} ～ ${addDays(ws,6)}`;
+
+    const perBookTotals=new Map();
+    modeSessions.forEach(s=>{
+      perBookTotals.set(s.bookId, (perBookTotals.get(s.bookId)||0) + (s.durationMinutes||0));
+    });
+    const filtered=filterBooksForStack(perBookTotals);
+    includeOthers=filtered.others;
+    bookOrder=filtered.bookIds.filter(id=>perBookTotals.get(id)>0);
+
+    for(const id of bookOrder) seriesByBookId[id]=Array(7).fill(0);
+    if(includeOthers) seriesByBookId["__others__"]=Array(7).fill(0);
+
+    modeSessions.forEach(s=>{
+      const d=new Date((s.date||"")+"T00:00:00");
+      const w=(d.getDay()+6)%7; // Mon=0
+      const mins=(s.durationMinutes||0);
+      if(bookOrder.includes(s.bookId)) seriesByBookId[s.bookId][w]+=mins;
+      else if(includeOthers) seriesByBookId["__others__"][w]+=mins;
+    });
+
+  }else if(mode==="day24"){
+    // 24 hours of anchor date
+    labels=Array.from({length:24},(_,i)=>pad2(i));
+    const start=anchor;
+    const end=addDays(anchor,1);
+    modeSessions=sessionsInRange(start,end);
+    modeLabel=`${anchor}（24 小時分布）`;
+
+    // totals by book
+    const perBookTotals=new Map();
+    modeSessions.forEach(s=>{
+      perBookTotals.set(s.bookId, (perBookTotals.get(s.bookId)||0) + (s.durationMinutes||0));
+    });
+    const filtered=filterBooksForStack(perBookTotals);
+    includeOthers=filtered.others;
+    bookOrder=filtered.bookIds.filter(id=>perBookTotals.get(id)>0);
+
+    for(const id of bookOrder) seriesByBookId[id]=Array(24).fill(0);
+    if(includeOthers) seriesByBookId["__others__"]=Array(24).fill(0);
+
+    // compute bins by splitting hours
+    const binsByBook={}; // bookId -> [24]
+    modeSessions.forEach(s=>addSessionToHourBins(s,binsByBook));
+
+    for(const [bookIdStr,arr] of Object.entries(binsByBook)){
+      const bookId=Number(bookIdStr);
+      for(let h=0;h<24;h++){
+        const v=arr[h]||0;
+        if(bookOrder.includes(bookId)) seriesByBookId[bookId][h]+=v;
+        else if(includeOthers) seriesByBookId["__others__"][h]+=v;
+      }
+    }
+  }
+
+  // totals
+  const modeTotalMin=modeSessions.reduce((a,s)=>a+(s.durationMinutes||0),0);
+  $("#modeTotal").textContent=minutesToHM(modeTotalMin);
+  $("#modeLabel").textContent=modeLabel;
+
+  // medium totals (for selected month)
+  const monthStartDate=monthStart(y,m);
+  const monthEndDate=addDays(monthStartDate, daysInMonth(y,m));
+  const monthSessions=sessionsInRange(monthStartDate, monthEndDate);
+  const medTotals=computeMediumTotals(monthSessions);
+  $("#mediumTotal").textContent=`紙 ${minutesToHM(medTotals["紙本"])} · 電 ${minutesToHM(medTotals["電子書"])} · 聽 ${minutesToHM(medTotals["聽書"])}`;
+
+  // monthly goal
+  const savedGoal=Number(state.meta.monthlyGoalHours||0);
+  if($("#monthlyGoal").value===""){ $("#monthlyGoal").value = savedGoal?String(savedGoal):""; }
+  const goalH=Number($("#monthlyGoal").value||0);
+  const doneH=monthSessions.reduce((a,s)=>a+(s.durationMinutes||0),0)/60;
+  const pct = goalH>0 ? Math.min(100, (doneH/goalH)*100) : 0;
+  $("#goalBar").style.width = `${pct}%`;
+  $("#goalText").textContent = goalH>0 ? `${doneH.toFixed(1)} / ${goalH.toFixed(1)} 小時（${Math.round(pct)}%）` : `本月累積 ${doneH.toFixed(1)} 小時（尚未設定目標）`;
+
+  // save goal to meta
+  // (debounced lightly)
+  clearTimeout(window.__goalT);
+  window.__goalT=setTimeout(async ()=>{
+    const g=Number($("#monthlyGoal").value||0);
+    state.meta.monthlyGoalHours=g;
+    await setMeta("monthlyGoalHours", g);
+    await saveAll();
+  }, 400);
+
+  // legend + chart
+  buildLegend(bookOrder, includeOthers);
+
+  if(!labels.length){
+    $("#chartHint").textContent="（沒有資料）";
+    const ctx=$("#chart").getContext("2d"); ctx.clearRect(0,0,$("#chart").width,$("#chart").height);
+  }else{
+    const titleHint = `${modeLabel} · 總計 ${minutesToHM(modeTotalMin)} · 堆疊：${$("#stackFilter").selectedOptions[0].textContent}`;
+    drawStackedChart(labels, seriesByBookId, bookOrder, includeOthers, titleHint);
+  }
+
+  // calendar uses selected month
+  renderCalendar(y,m);
+}
+
+// stack pick
+function openPickBooksModal(){
+  const all=state.books.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"zh-Hant"));
+  const selected=new Set((state.selectedBooks||[]).map(Number));
+  openModal("選擇要顯示的書（統計堆疊）",`
+    <div class="grid">
+      <div class="hint">只在「堆疊顯示＝自選書籍」時生效。</div>
+      <div class="list" id="pickList"></div>
+      <div class="row">
+        <button class="btn secondary" id="pickAll">全選</button>
+        <button class="btn secondary" id="pickNone">全不選</button>
+        <button class="btn" id="pickSave">完成</button>
+      </div>
+    </div>
+  `);
+  const box=$("#pickList");
+  all.forEach(b=>{
+    const id=Number(b.id);
+    const el=document.createElement("div"); el.className="item"; el.style.boxShadow="none";
+    el.innerHTML=`<div class="itemTitle">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="dot" style="background:${bookColor(id)}"></span>
+        <div style="font-weight:900;">${escapeHTML(b.title)}</div>
+      </div>
+      <input type="checkbox" data-id="${id}" ${selected.has(id)?"checked":""} style="width:20px;height:20px;"/>
+    </div>`;
+    box.appendChild(el);
+  });
+  $("#pickAll").addEventListener("click",()=>$$('#pickList input[type="checkbox"]').forEach(c=>c.checked=true));
+  $("#pickNone").addEventListener("click",()=>$$('#pickList input[type="checkbox"]').forEach(c=>c.checked=false));
+  $("#pickSave").addEventListener("click",async ()=>{
+    const ids=$$('#pickList input[type="checkbox"]:checked').map(c=>Number(c.dataset.id)).filter(Boolean);
+    state.selectedBooks=ids;
+    await setMeta("selectedBooks", ids);
+    state.meta.selectedBooks=ids;
+    await saveAll();
+    closeModal();
+    toast("已更新自選書籍");
+    renderStats();
+  });
+}
+
+$("#btnPickBooks").addEventListener("click",openPickBooksModal);
+$("#statsMode").addEventListener("change",renderStats);
+$("#statsYear").addEventListener("change",renderStats);
+$("#statsMonth").addEventListener("change",renderStats);
+$("#statsAnchorDate").addEventListener("change",renderStats);
+$("#stackFilter").addEventListener("change",async ()=>{
+  state.stackFilter=$("#stackFilter").value;
+  state.meta.stackFilter=state.stackFilter;
+  await setMeta("stackFilter", state.stackFilter);
+  await saveAll();
+  renderStats();
+});
+$("#monthlyGoal").addEventListener("input",renderStats);
+
+/* Clicking on chart shouldn't navigate anywhere (fix old bug) */
+$("#chart").addEventListener("click",(e)=>{ e.stopPropagation(); });
+
+/* =========================
+   Rank
+========================= */
+function inRankRange(session, year, monthVal){
+  if(Number((session.date||"").slice(0,4))!==year) return false;
+  if(monthVal==="all") return true;
+  return (session.date||"").slice(5,7)===monthVal;
+}
+function bookMinutesInRange(bookId, year, monthVal){
+  return state.sessions
+    .filter(s=>Number(s.bookId)===Number(bookId) && inRankRange(s,year,monthVal))
+    .reduce((a,s)=>a+(s.durationMinutes||0),0);
+}
+function renderRank(){
+  const years=getYears();
+  $("#rankYear").innerHTML=years.map(y=>`<option value="${y}">${y}</option>`).join("");
+  const year=Number($("#rankYear").value||years[0]||new Date().getFullYear());
+  $("#rankYear").value=String(year);
+  const monthVal=$("#rankMonth").value||"all";
+
+  $("#rankEmpty").style.display=state.books.length?"none":"block";
+  const box=$("#rankList"); box.innerHTML="";
+
+  for(let r=5;r>=1;r--){
+    const group=state.books.filter(b=>Number(b.rating||3)===r);
+    if(!group.length) continue;
+
+    const items=group
+      .map(b=>({b, minutes: bookMinutesInRange(b.id, year, monthVal)}))
+      .sort((a,b)=>b.minutes-a.minutes || String(a.b.title).localeCompare(String(b.b.title),"zh-Hant"));
+
+    const section=document.createElement("div");
+    section.className="item";
+    section.innerHTML=`<div class="itemTitle">
+      <div style="font-weight:900;">${"★".repeat(r)}${"☆".repeat(5-r)}</div>
+      <div class="meta">${monthVal==="all"?`${year} 年`:`${year}-${monthVal}`}</div>
+    </div>
+    <div class="list" style="margin-top:10px;" id="rank_${r}"></div>`;
+    box.appendChild(section);
+
+    const inner=section.querySelector(`#rank_${r}`);
+    items.forEach(({b,minutes})=>{
+      const el=document.createElement("div");
+      el.className="item";
+      el.style.boxShadow="none";
+      el.innerHTML=`<div class="itemTitle">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="dot" style="background:${bookColor(b.id)}"></span>
+          <div style="font-weight:900;">${escapeHTML(b.title)}</div>
+        </div>
+        <div style="font-weight:900;">${minutesToHM(minutes)}</div>
+      </div>
+      <div class="meta">${escapeHTML(b.author||"")} · ${escapeHTML(b.medium||"")}${b.category?` · ${escapeHTML(b.category)}`:""}</div>`;
+      inner.appendChild(el);
+    });
+  }
+
+  if(!box.children.length){
+    const em=document.createElement("div");
+    em.className="hint";
+    em.textContent="目前沒有可顯示的榜單（先在書庫新增書、或給書評分）。";
+    box.appendChild(em);
+  }
+}
+$("#rankYear").addEventListener("change",renderRank);
+$("#rankMonth").addEventListener("change",renderRank);
+
+/* =========================
+   Init
+========================= */
+$("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常、可以點！"));
+
+(async function init(){
+  $("#verChip").textContent = `v${APP_VER} full`;
+  try{ db=await idbOpen(); storageMode="idb"; $("#storageChip").textContent="已啟用 IndexedDB"; }
+  catch(e){ console.warn("IndexedDB unavailable; using localStorage", e); storageMode="ls"; $("#storageChip").textContent="⚠️ IndexedDB 不可用，改用 localStorage"; }
+
+  const {books,sessions,meta}=await loadAll();
+  state.books=Array.isArray(books)?books:[];
+  state.sessions=Array.isArray(sessions)?sessions:[];
+  state.meta=(meta&&typeof meta==="object")?meta:{};
+
+  // pull meta prefs
+  const cats=state.meta.categories; if(Array.isArray(cats)&&cats.length) state.categories=cats;
+  const sf=state.meta.stackFilter; if(sf) state.stackFilter=sf;
+  const sel=state.meta.selectedBooks; if(Array.isArray(sel)) state.selectedBooks=sel;
+  const goal=state.meta.monthlyGoalHours; if(goal!==undefined) $("#monthlyGoal").value=String(goal);
+
+  ensureDefaultBook();
+  refreshBookSelects();
+
+  $("#todayDate").value=toISODate(new Date());
+  $("#logsDate").value=toISODate(new Date());
+  $("#statsAnchorDate").value=toISODate(new Date());
+  $("#statsMonth").value=`${new Date().getFullYear()}-${pad2(new Date().getMonth()+1)}`;
+  $("#stackFilter").value=state.stackFilter;
+
+  loadTimer(); updateTimerUI(); syncTimerButtons();
+
+  renderToday(); renderBooks(); renderLogs(); renderStats(); renderRank();
+
+  // Super important: avoid Service Worker on localhost to prevent "all clicks dead" due to cached broken builds
+  const isLocal=(location.hostname==="127.0.0.1"||location.hostname==="localhost");
+  if(!isLocal && "serviceWorker" in navigator){
+    navigator.serviceWorker.register("./sw.js").catch(console.warn);
+  }
+})();
+</script>
+</body>
+</html>
