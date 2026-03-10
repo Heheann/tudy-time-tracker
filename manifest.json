@@ -1,6 +1,6 @@
 {
-  "name": "霧粉奶茶｜讀書計時",
-  "short_name": "讀書計時",
+  "name": "Hours Between Pages",
+  "short_name": "Hours Between Pages",
   "start_url": "./index.html?v=3.2",
   "display": "standalone",
   "background_color": "#FFF6FA",
