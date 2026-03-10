@@ -547,6 +547,12 @@
     <div class="brandRow">
       <div class="brand">Hours Between Pages <span class="chip" id="verChip">v3.1 full</span></div>
       <span class="chip" id="storageChip">—</span>
+      <button class="chip" id="btnCheckUpdate" style="cursor:pointer;">🔄 檢查更新</button>
+    </div>
+    <div class="sub" id="quoteBanner">✦ 載入今日名言中…</div>
+    <div class="sub updateBanner" id="updateBanner" style="display:none;">
+      <span id="updateBannerText">有新版本可用</span>
+      <button class="btn small" id="btnUpdateNow" style="min-height:34px;padding:6px 10px;">立即更新</button>
     </div>
     <div class="sub" id="quoteBanner">✦ 載入今日名言中…</div>
 <div class="sub updateBanner" id="updateBanner" style="display:none;">
@@ -2147,12 +2153,21 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
   // Super important: avoid Service Worker on localhost to prevent "all clicks dead" due to cached broken builds
   const isLocal=(location.hostname==="127.0.0.1"||location.hostname==="localhost");
   const SW_UPDATE_CONFIG={ autoApply:false, autoClaimClients:true };
-  function showAppUpdateBanner(reg){
+  let swReg=null;
+
+  function showAppUpdateBanner(reg, message="有新版本可用"){
     const bar=$("#updateBanner");
     if(!bar) return;
+
+    const txt=$("#updateBannerText");
+    if(txt) txt.textContent=message;
+
     bar.classList.add("show");
+
     const btn=$("#btnUpdateNow");
     if(btn){
+      btn.disabled=false;
+      btn.textContent="立即更新";
       btn.onclick=()=>{
         if(reg?.waiting){
           reg.waiting.postMessage({type:"SKIP_WAITING"});
@@ -2163,11 +2178,26 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
       };
     }
   }
+  function hideUpdateBanner(){ $("#updateBanner")?.classList.remove("show"); }
+  async function checkForAppUpdate(manual=false){
+    if(!swReg) return;
+    try{
+      await swReg.update();
+      if(swReg.waiting){
+        if(SW_UPDATE_CONFIG.autoApply){ swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
+        else showAppUpdateBanner(swReg, "有新版本可用");
+      }else if(manual){
+        hideUpdateBanner();
+        toast("目前已是最新版本");
+      }
+    }catch(e){ if(manual) toast("檢查更新失敗"); }
+  }
   window.__debugShowUpdateBanner=()=>showAppUpdateBanner({waiting:{postMessage:()=>{}}});
 
   if(!isLocal && "serviceWorker" in navigator){
     try{
-      const reg=await navigator.serviceWorker.register("./sw.js");
+      swReg=await navigator.serviceWorker.register("./sw.js");
+      $("#btnCheckUpdate")?.addEventListener("click",()=>checkForAppUpdate(true));
 
       navigator.serviceWorker.addEventListener("controllerchange", ()=>{
         if(window.__swRefreshing) return;
@@ -2175,22 +2205,24 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
         location.reload();
       });
 
-      if(reg.waiting){
-        if(SW_UPDATE_CONFIG.autoApply){ reg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) reg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
-        else showAppUpdateBanner(reg);
+      if(swReg.waiting){
+        if(SW_UPDATE_CONFIG.autoApply){ swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
+        else showAppUpdateBanner(swReg);
       }
 
-      reg.addEventListener("updatefound", ()=>{
-        const nw=reg.installing;
+      swReg.addEventListener("updatefound", ()=>{
+        const nw=swReg.installing;
         if(!nw) return;
         nw.addEventListener("statechange", ()=>{
           if(nw.state==="installed" && navigator.serviceWorker.controller){
-            if(SW_UPDATE_CONFIG.autoApply){ reg.waiting?.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) reg.waiting?.postMessage({type:"CLAIM_CLIENTS"}); }
-            else showAppUpdateBanner(reg);
+            if(SW_UPDATE_CONFIG.autoApply){ swReg.waiting?.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) swReg.waiting?.postMessage({type:"CLAIM_CLIENTS"}); }
+            else showAppUpdateBanner(swReg);
           }
         });
       });
     }catch(e){ console.warn(e); }
+  }else{
+    $("#btnCheckUpdate")?.addEventListener("click",()=>toast("本機開發模式不啟用 SW"));
   }
 })();
 </script>
