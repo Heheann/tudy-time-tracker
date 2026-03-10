@@ -1,7 +1,7 @@
 {
   "name": "霧粉奶茶｜讀書計時",
   "short_name": "讀書計時",
-  "start_url": "./index.html?v=3.1",
+  "start_url": "./index.html?v=3.2",
   "display": "standalone",
   "background_color": "#FFF6FA",
   "theme_color": "#D7A0B3",

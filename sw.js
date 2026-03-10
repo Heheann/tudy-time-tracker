@@ -1,14 +1,28 @@
-const CACHE_NAME = "reading-timer-pwa-v3.2";
-const ASSETS = ["./", "./index.html?v=3.1", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+const CACHE_NAME = "reading-timer-pwa-v3.2-book-detail";
+
+const ASSETS = [
+  "./",
+  "./index.html?v=3.2",
+  "./index.html",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
+];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.map((k) => (k === CACHE_NAME ? null : caches.delete(k)))))
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((k) => (k === CACHE_NAME ? null : caches.delete(k)))
+      )
+    )
   );
   self.clients.claim();
 });
@@ -16,14 +30,13 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const { request } = e;
 
-  // 只處理 GET，避免意外攔截 POST/PUT 等請求。
+  // 只處理 GET
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
 
-  // 只快取同源請求，避免把第三方資源塞進 cache。
+  // 只處理同源請求
   if (url.origin !== self.location.origin) return;
-
   e.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
