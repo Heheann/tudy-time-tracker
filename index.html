@@ -4,112 +4,263 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#D7A0B3" />
-  <title>霧粉奶茶｜讀書計時</title>
+  <title>Hours Between Pages</title>
   <link rel="manifest" href="./manifest.json" />
   <style>
     :root{
-      /* Pinkier palette */
-      --bg:#FFF6FA;        /* very light pink */
-      --card:#FFFFFF;
-      --ink:#2B2B2B;
-      --muted:#6D6A6A;
-      --line:#F0DDE6;      /* pink line */
-      --accent:#D7A0B3;    /* rosy */
-      --accent2:#C58E8A;   /* milk tea */
-      --accent3:#F1C9D6;   /* soft pink */
-      --shadow:0 10px 30px rgba(43,43,43,.08);
-      --shadow2:0 6px 18px rgba(43,43,43,.06);
-      --radius:18px;
+      --bg:#fff8f7;
+      --bg-soft:#fdeff2;
+      --ink:#3a2f34;
+      --muted:#7f7076;
+      --line:rgba(214,170,184,.45);
+      --glass:rgba(255,255,255,.64);
+      --glass-strong:rgba(255,255,255,.82);
+      --accent:#dfadba;
+      --accent-2:#c89b8d;
+      --accent-3:#f4d9e5;
+      --peach:#f3bc9f;
+      --lav:#d8c4e8;
+      --ok:#86b896;
+      --warn:#e0ae72;
+      --err:#cb8888;
+      --shadow:0 20px 42px rgba(113,80,94,.14);
+      --shadow-soft:0 10px 24px rgba(113,80,94,.10);
+      --radius:22px;
       --tap:52px;
       --font: ui-rounded, system-ui, -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:var(--font);color:var(--ink);min-height:100vh;
+    html,body{min-height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:var(--font);
       background:
-        radial-gradient(900px 340px at 10% -5%, rgba(241,201,214,.55), rgba(255,246,250,0) 60%),
-        radial-gradient(900px 340px at 90% 0%, rgba(213,160,179,.32), rgba(255,246,250,0) 55%),
-        linear-gradient(180deg, rgba(213,160,179,.10), rgba(197,142,138,.06) 40%, rgba(255,246,250,1));
+        radial-gradient(920px 450px at -8% -8%, rgba(244,196,212,.62), rgba(255,248,247,0) 62%),
+        radial-gradient(680px 380px at 108% 8%, rgba(216,196,232,.45), rgba(255,248,247,0) 55%),
+        radial-gradient(780px 460px at 85% 92%, rgba(243,188,159,.28), rgba(255,248,247,0) 62%),
+        linear-gradient(180deg, var(--bg-soft), var(--bg));
     }
-    header{position:sticky;top:0;z-index:10;backdrop-filter:saturate(1.2) blur(10px);
-      background:rgba(255,246,250,.82);border-bottom:1px solid var(--line);padding:14px 16px 10px;}
-    main{padding:14px 16px 86px;max-width:980px;margin:0 auto}
+    header{
+      position:sticky;
+      top:0;
+      z-index:22;
+      margin:10px 10px 0;
+      border-radius:22px;
+      padding:12px 14px 10px;
+      border:1px solid var(--line);
+      background:rgba(255,247,249,.65);
+      backdrop-filter:blur(15px) saturate(1.2);
+      box-shadow:var(--shadow-soft);
+    }
+    main{max-width:1240px;margin:0 auto;padding:14px 14px 98px;position:relative}
     .brandRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-    .brand{font-weight:900;font-size:22px}
+    .brand{font-weight:900;font-size:21px;letter-spacing:.01em}
     .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(255,255,255,.88);font-size:12px;color:var(--muted);box-shadow:var(--shadow2);white-space:nowrap}
-    .sub{margin-top:4px;color:var(--muted);font-size:13px}
+      background:var(--glass-strong);font-size:12px;color:var(--muted);box-shadow:var(--shadow-soft);white-space:nowrap}
+    .sub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.6;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.45);box-shadow:var(--shadow-soft)}
+    .updateBanner{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--ink);background:rgba(255,255,255,.62)}
+    .updateBanner.show{display:flex !important}
+
     .grid{display:grid;gap:12px}
-    .card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow2);padding:14px}
-    h2{margin:0 0 10px 0;font-size:16px}
+    section.grid{grid-template-columns:minmax(0,1fr)}
+    .card{
+      background:var(--glass);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+      padding:14px;
+      backdrop-filter:blur(16px);
+    }
+    #view-today .card:first-child{background:linear-gradient(145deg, rgba(255,255,255,.78), rgba(244,217,229,.5));}
+    #view-rank .card:first-child{background:linear-gradient(145deg, rgba(255,255,255,.74), rgba(216,196,232,.36));}
+    h2{margin:0 0 10px;font-size:16px}
     .hint{font-size:12px;color:var(--muted)}
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .rowBetween{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
     label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input,select,textarea{width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:#fff;font-family:var(--font);outline:none}
-    textarea{min-height:86px;resize:vertical}
-    input:focus,select:focus,textarea:focus{border-color:rgba(215,160,179,.65);box-shadow:0 0 0 4px rgba(215,160,179,.16)}
-    .btn{min-height:var(--tap);padding:12px 14px;border-radius:16px;border:1px solid rgba(215,160,179,.45);
-      background:linear-gradient(180deg, rgba(215,160,179,.26), rgba(215,160,179,.14));
-      color:var(--ink);font-weight:900;cursor:pointer;box-shadow:var(--shadow2)}
-    .btn.secondary{border-color:var(--line);background:rgba(255,255,255,.92);font-weight:800}
-    .btn.danger{border-color:rgba(192,81,81,.32);background:linear-gradient(180deg, rgba(192,81,81,.16), rgba(192,81,81,.08));color:#5A2323}
+    input,select,textarea{
+      width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.8);
+      font-family:var(--font);outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)
+    }
+    textarea{min-height:88px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:rgba(223,173,186,.86);box-shadow:0 0 0 4px rgba(223,173,186,.18)}
+    .btn{
+      min-height:var(--tap);padding:12px 14px;border-radius:16px;border:1px solid rgba(223,173,186,.5);
+      background:linear-gradient(180deg, rgba(223,173,186,.36), rgba(223,173,186,.14));
+      color:var(--ink);font-weight:900;cursor:pointer;box-shadow:var(--shadow-soft)
+    }
+    .btn.secondary{border-color:var(--line);background:rgba(255,255,255,.82)}
+    .btn.danger{border-color:rgba(203,136,136,.45);background:linear-gradient(180deg, rgba(203,136,136,.2), rgba(203,136,136,.08));color:#65393b}
     .btn.small{min-height:40px;padding:10px 12px;border-radius:14px;font-weight:800}
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(255,255,255,.88);font-size:12px;color:var(--muted)}
+      background:rgba(255,255,255,.8);font-size:12px;color:var(--muted)}
     .kpi{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px;border-radius:16px;
-      background:rgba(241,201,214,.35); border:1px solid rgba(215,160,179,.18)}
+      background:linear-gradient(145deg, rgba(244,217,229,.46), rgba(255,255,255,.56)); border:1px solid rgba(223,173,186,.28)}
     .kpi .big{font-size:22px;font-weight:900}
     .kpi .small{font-size:12px;color:var(--muted)}
     .list{display:grid;gap:10px}
-    .item{padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.92);box-shadow:var(--shadow2)}
+    .item{padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.8);box-shadow:var(--shadow-soft)}
     .itemTitle{display:flex;align-items:center;justify-content:space-between;gap:10px}
     .meta{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.5}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
     .chipTag{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(255,255,255,.90);font-size:12px;color:var(--muted);white-space:nowrap}
+      background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:nowrap}
     .cover{width:44px;height:58px;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.06);background:rgba(240,221,230,.65);flex:0 0 auto}
     .cover img{width:100%;height:100%;object-fit:cover}
     .dot{width:10px;height:10px;border-radius:4px;border:1px solid rgba(0,0,0,.06);display:inline-block}
     .starRow{display:flex;gap:6px;align-items:center}
     .star{cursor:pointer;font-size:18px;user-select:none}
-    .tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:50;width:min(980px, calc(100% - 16px));
-      background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:10px;
-      display:grid;grid-template-columns:repeat(5,1fr);gap:10px;backdrop-filter:blur(12px)}
-    .tabBtn{border:1px solid var(--line);background:rgba(255,246,250,.88);border-radius:18px;padding:10px 8px;min-height:58px;cursor:pointer;
+
+    .tabs{
+      position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:50;width:min(1020px, calc(100% - 16px));
+      background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:10px;
+      display:grid;grid-template-columns:repeat(5,1fr);gap:10px;backdrop-filter:blur(16px)
+    }
+    .tabBtn{border:1px solid var(--line);background:rgba(255,248,247,.86);border-radius:18px;padding:10px 8px;min-height:58px;cursor:pointer;
       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-weight:900;user-select:none}
     .tabBtn strong{font-size:13px}
     .tabBtn span{font-size:16px}
-    .tabBtn.active{background:linear-gradient(180deg, rgba(215,160,179,.28), rgba(215,160,179,.14));border-color:rgba(215,160,179,.42);color:var(--ink)}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;z-index:100;background:rgba(43,43,43,.92);color:#fff;
+    .tabBtn.active{
+      background:linear-gradient(180deg, rgba(223,173,186,.42), rgba(216,196,232,.28));
+      border-color:rgba(223,173,186,.62);
+      color:var(--ink);
+    }
+
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;z-index:100;background:rgba(58,49,53,.93);color:#fff;
       padding:10px 12px;border-radius:14px;max-width:min(640px, calc(100% - 26px));font-size:13px;box-shadow:var(--shadow);
       opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-    .modalMask{position:fixed;inset:0;background:rgba(43,43,43,.35);display:none;z-index:120;padding:18px 16px}
-    .modal{max-width:760px;margin:0 auto;background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
-    .modalHead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,246,250,.88)}
-    .modalBody{padding:14px;max-height:calc(80vh - 80px);overflow:auto}
+    .modalMask{position:fixed;inset:0;background:rgba(45,38,41,.35);display:none;z-index:120;padding:18px 16px}
+    .modal{max-width:760px;margin:0 auto;background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(18px)}
+    .modalHead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,246,250,.8)}
+    .modalBody{padding:14px;max-height:calc(86vh - 80px);overflow:auto}
+
     .progress{height:12px;border-radius:999px;background:rgba(240,221,230,.75);overflow:hidden;border:1px solid var(--line)}
-    .progress>div{height:100%;width:0%;background:linear-gradient(90deg, rgba(215,160,179,.88), rgba(197,142,138,.78));border-radius:999px}
-    canvas{width:100%;height:300px;border-radius:16px;background:rgba(255,255,255,.78);border:1px solid var(--line)}
+    .progress>div{height:100%;width:0%;background:linear-gradient(90deg, rgba(223,173,186,.92), rgba(200,155,141,.84));border-radius:999px}
+    canvas{width:100%;height:300px;border-radius:16px;background:rgba(255,255,255,.76);border:1px solid var(--line)}
     .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px}
-    .calCell{border:1px solid var(--line);background:rgba(255,255,255,.90);border-radius:14px;padding:8px;min-height:68px;cursor:pointer}
+    .calCell{border:1px solid var(--line);background:rgba(255,255,255,.84);border-radius:14px;padding:8px;min-height:68px;cursor:pointer}
     .calCell .d{font-size:12px;color:var(--muted);font-weight:900}
     .dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
-    .topRightTest{position:absolute;right:12px;top:12px;z-index:20}
+    .topRightTest{position:absolute;right:14px;top:8px;z-index:20}
     .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
     .legend .chipTag{cursor:default}
     .toggleRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .smallNote{font-size:12px;color:var(--muted)}
-  </style>
+
+
+
+    /* Book detail page */
+    #view-book-detail .card{overflow:hidden}
+    .detailHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .detailSlider{
+      position:relative;
+      overflow:hidden;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.38);
+      padding:8px 0;
+      touch-action:pan-y;
+    }
+    .detailTrack{display:flex;align-items:stretch;transition:transform .28s ease}
+    .detailSlide{flex:0 0 100%;padding:0 10%}
+    .detailPeek{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:14%;
+      min-width:46px;
+      aspect-ratio:3/4;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:linear-gradient(145deg, rgba(255,255,255,.88), rgba(244,217,229,.58));
+      box-shadow:var(--shadow-soft);
+      pointer-events:none;
+      opacity:.9;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:12px;
+      overflow:hidden;
+    }
+    .detailPeek.left{left:-5%}
+    .detailPeek.right{right:-5%}
+    .detailCover{width:min(220px,45vw);aspect-ratio:3/4;border-radius:18px;border:1px solid var(--line);overflow:hidden;background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(216,196,232,.4));display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:800;letter-spacing:.04em}
+    .detailCover img{width:100%;height:100%;object-fit:cover}
+    .detailBody{display:grid;gap:10px;align-content:start}
+    .detailTitle{font-size:24px;font-weight:900;line-height:1.2}
+    .detailMeta{display:flex;flex-wrap:wrap;gap:8px}
+    .detailKpi{padding:12px;border-radius:16px;border:1px solid rgba(223,173,186,.28);background:linear-gradient(145deg, rgba(244,217,229,.5), rgba(255,255,255,.7))}
+    .detailKpi .big{font-size:28px;font-weight:900}
+    .detailColor{width:18px;height:18px;border-radius:6px;border:1px solid rgba(0,0,0,.08);display:inline-block;vertical-align:middle}
+    .detailNavBtns{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
+    .detailArrow{min-width:44px}
+    @media (prefers-reduced-motion: reduce){
+      .detailTrack{transition:none}
+    }
+
+    /* Masonry lists for gallery feeling */
+    #bookList,#rankList{column-count:1;column-gap:10px;display:block}
+    #bookList .item,#rankList .item{break-inside:avoid;display:inline-block;width:100%;margin:0 0 10px}
+
+    /* Desktop: sticky sidebar + bento board */
+    @media (min-width: 980px){
+      body{padding-left:196px}
+      header{margin:14px 22px 0}
+      main{padding:14px 22px 28px;max-width:none}
+      .tabs{
+        left:14px;top:14px;bottom:14px;transform:none;width:168px;grid-template-columns:1fr;grid-auto-rows:min-content;
+        align-content:start;border-radius:26px;position:fixed;padding:12px;gap:8px
+      }
+      .tabBtn{min-height:64px}
+      section.grid{grid-template-columns:repeat(12,minmax(0,1fr));}
+      #view-today .card:nth-child(1){grid-column:span 8}
+      #view-today .card:nth-child(2){grid-column:span 4}
+      #view-books .card:nth-child(1){grid-column:span 5}
+      #view-books .card:nth-child(2){grid-column:span 7}
+      #view-logs .card:nth-child(1){grid-column:span 5}
+      #view-logs .card:nth-child(2){grid-column:span 7}
+      #view-stats .card:nth-child(1){grid-column:span 8}
+      #view-stats .card:nth-child(2){grid-column:span 4}
+      #view-stats .card:nth-child(3){grid-column:span 12}
+      #view-rank .card:nth-child(1){grid-column:span 5}
+      #view-rank .card:nth-child(2){grid-column:span 7}
+      #view-book-detail .card{grid-column:span 12}
+      #bookList,#rankList{column-count:2;column-gap:12px}
+    }
+    @media (min-width: 1300px){
+      #bookList,#rankList{column-count:3}
+    }
+    @media (max-width: 520px){
+      header{margin:8px 8px 0;padding:10px 12px 8px}
+      .brand{font-size:18px}
+      .sub{font-size:12px}
+      main{padding:10px 10px 96px}
+      .tabs{width:calc(100% - 12px);padding:8px;gap:8px;border-radius:20px}
+      .tabBtn{padding:8px 4px;min-height:54px;border-radius:14px}
+      .tabBtn strong{font-size:12px}
+      .tabBtn span{font-size:15px}
+      .card{padding:12px}
+      .modalMask{padding:12px 10px}
+      .modalBody{max-height:calc(92vh - 76px)}
+      .topRightTest{position:static;margin-bottom:8px}
+    }
+</style>
 </head>
 <body>
   <header>
     <div class="brandRow">
-      <div class="brand">霧粉奶茶｜讀書計時 <span class="chip" id="verChip">v3.1 full</span></div>
+      <div class="brand">Hours Between Pages <span class="chip" id="verChip">v3.1 full</span></div>
       <span class="chip" id="storageChip">—</span>
     </div>
-    <div class="sub">可愛再粉一點 ✅ 功能都加回來（統計/堆疊/排行榜/分類/封面/匯入匯出/目標）。</div>
+    <div class="sub" id="quoteBanner">✦ 載入今日名言中…</div>
+    <div class="sub updateBanner" id="updateBanner" style="display:none;">
+      <span>有新版本可用</span>
+      <button class="btn small" id="btnUpdateNow" style="min-height:34px;padding:6px 10px;">立即更新</button>
+    </div>
   </header>
 
   <main>
@@ -174,6 +325,26 @@
         <h2>我的書</h2>
         <div class="list" id="bookList"></div>
         <div class="hint" id="bookEmpty" style="display:none;">目前還沒有書籍。按「新增書籍」開始建立你的閱讀宇宙 ✨</div>
+      </div>
+    </section>
+
+    <!-- Book Detail -->
+    <section id="view-book-detail" class="grid" style="display:none;">
+      <div class="card">
+        <div class="detailHead">
+          <button class="btn secondary small" id="btnBackToBooks">← 回到書庫</button>
+          <div class="hint" id="detailPosition">—</div>
+        </div>
+        <div class="detailSlider" id="detailSlider">
+          <div class="detailPeek left" id="detailPeekPrev"></div>
+          <div class="detailTrack" id="detailTrack"></div>
+          <div class="detailPeek right" id="detailPeekNext"></div>
+        </div>
+        <div class="detailNavBtns">
+          <button class="btn secondary small detailArrow" id="btnPrevBook">← 上一本</button>
+          <button class="btn" id="btnStartThisBook">▶️ 立刻開始讀這本</button>
+          <button class="btn secondary small detailArrow" id="btnNextBook">下一本 →</button>
+        </div>
       </div>
     </section>
 
@@ -383,6 +554,54 @@ function normalizeHexToRGBA(c){
   return `rgba(${r},${g},${b},${a.toFixed(3)})`;
 }
 
+const QUOTES = [
+  { country:"英國", author:"William Shakespeare", work:"Hamlet", text:"To be, or not to be." },
+  { country:"英國", author:"William Shakespeare", work:"As You Like It", text:"All the world’s a stage." },
+  { country:"法國", author:"Victor Hugo", work:"Les Misérables", text:"Even the darkest night will end and the sun will rise." },
+  { country:"法國", author:"Victor Hugo", work:"", text:"To love is to act." },
+  { country:"俄國", author:"Leo Tolstoy", work:"Anna Karenina", text:"All happy families are alike; each unhappy family is unhappy in its own way." },
+  { country:"俄國", author:"Leo Tolstoy", work:"", text:"If you want to be happy, be." },
+  { country:"西班牙", author:"Miguel de Cervantes", work:"Don Quixote", text:"Those who read much and walk much, go far." },
+  { country:"西班牙", author:"Miguel de Cervantes", work:"", text:"The proof of the pudding is in the eating." },
+  { country:"義大利", author:"Dante Alighieri", work:"Inferno", text:"Abandon all hope, ye who enter here." },
+  { country:"義大利", author:"Dante Alighieri", work:"", text:"In His will is our peace." },
+  { country:"美國", author:"Mark Twain", work:"", text:"The secret of getting ahead is getting started." },
+  { country:"美國", author:"Mark Twain", work:"", text:"The reports of my death are greatly exaggerated." },
+  { country:"愛爾蘭", author:"Oscar Wilde", work:"", text:"Be yourself; everyone else is already taken." },
+  { country:"愛爾蘭", author:"Oscar Wilde", work:"", text:"We are all in the gutter, but some of us are looking at the stars." },
+  { country:"印度", author:"Rabindranath Tagore", work:"", text:"Faith is the bird that feels the light when the dawn is still dark." },
+  { country:"印度", author:"Rabindranath Tagore", work:"", text:"You can’t cross the sea merely by standing and staring at the water." },
+  { country:"日本", author:"Matsuo Bashō", work:"", text:"Every day is a journey, and the journey itself is home." },
+  { country:"日本", author:"Matsuo Bashō", work:"", text:"An old silent pond— a frog jumps into the pond." },
+  { country:"中國", author:"魯迅", work:"", text:"希望是附麗於存在的，有存在，便有希望，有希望，便是光明。" },
+  { country:"中國", author:"魯迅", work:"", text:"不在沉默中爆發，就在沉默中滅亡。" },
+];
+
+function getDailyQuote(){
+  const day = toISODate(new Date());
+  const LS_DAY = "rtpwa_quote_day";
+  const LS_KEY = "rtpwa_quote_key";
+  const savedDay = localStorage.getItem(LS_DAY);
+  const savedKey = Number(localStorage.getItem(LS_KEY));
+  if(savedDay===day && Number.isInteger(savedKey) && savedKey>=0 && savedKey<QUOTES.length){
+    return {key:savedKey, quote:QUOTES[savedKey]};
+  }
+  const seed = day.split('-').join('');
+  let h=0;
+  for(const ch of seed){ h=(h*31 + ch.charCodeAt(0)) % 2147483647; }
+  const key = h % QUOTES.length;
+  localStorage.setItem(LS_DAY, day);
+  localStorage.setItem(LS_KEY, String(key));
+  return {key, quote:QUOTES[key]};
+}
+function renderQuoteBanner(){
+  const el = $("#quoteBanner");
+  if(!el) return;
+  const {quote} = getDailyQuote();
+  const work = quote.work ? `｜${quote.work}` : "";
+  el.textContent = `✦ “${quote.text}” — ${quote.author}（${quote.country}）${work}`;
+}
+
 /* =========================
    Storage (IDB + LS fallback)
 ========================= */
@@ -470,7 +689,8 @@ let state={
   categories:["文學","歷史","財經"],
   meta:{},
   stackFilter:"all",
-  selectedBooks:[] // for custom stack
+  selectedBooks:[], // for custom stack
+  detailBookId:null
 };
 
 function ensureDefaultBook(){
@@ -490,6 +710,17 @@ function bookColor(id){
   return normalizeHexToRGBA(b?.color)||b?.color||"rgba(215,160,179,.75)";
 }
 function bookName(id){ return getBookById(id)?.title || "（已刪除的書）"; }
+function sortedBooks(){
+  return state.books.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"zh-Hant"));
+}
+function totalMinutesForBook(bookId){
+  return state.sessions.filter(s=>Number(s.bookId)===Number(bookId)).reduce((a,s)=>a+Number(s.durationMinutes||0),0);
+}
+function minutesToLongHM(m){
+  const min=Math.max(0,Math.round(m||0));
+  const h=Math.floor(min/60); const mm=min%60;
+  return `${h}h ${String(mm).padStart(2,"0")}m`;
+}
 
 function refreshBookSelects(){
   const opts=state.books.slice()
@@ -512,10 +743,11 @@ $("#modalMask").addEventListener("click",(e)=>{ if(e.target.id==="modalMask") cl
 ========================= */
 function showView(name){
   state.view=name;
-  ["today","books","logs","stats","rank"].forEach(v=>$("#view-"+v).style.display=(v===name)?"":"none");
+  ["today","books","book-detail","logs","stats","rank"].forEach(v=>$("#view-"+v).style.display=(v===name)?"":"none");
   $$("#tabs .tabBtn").forEach(btn=>btn.classList.toggle("active", btn.dataset.view===name));
   if(name==="today") renderToday();
   if(name==="books") renderBooks();
+  if(name==="book-detail") renderBookDetail();
   if(name==="logs") renderLogs();
   if(name==="stats") renderStats();
   if(name==="rank") renderRank();
@@ -807,10 +1039,15 @@ function openBookModal(book=null){
   }
 }
 
+function openBookDetail(bookId){
+  state.detailBookId=Number(bookId);
+  showView("book-detail");
+}
+
 function renderBooks(){
   $("#bookEmpty").style.display=state.books.length?"none":"block";
   const box=$("#bookList"); box.innerHTML="";
-  state.books.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"zh-Hant")).forEach(b=>{
+  sortedBooks().forEach(b=>{
     const el=document.createElement("div");
     el.className="item";
     el.innerHTML=`<div class="itemTitle">
@@ -833,11 +1070,107 @@ function renderBooks(){
       <span class="chipTag">狀態：${escapeHTML(b.status||"")}</span>
       <span class="chipTag">閱讀：${escapeHTML(b.medium||"")}</span>
     </div>
-    <div class="row" style="margin-top:10px;"><button class="btn secondary small" data-edit="${b.id}">編輯</button></div>`;
+    <div class="row" style="margin-top:10px;">
+      <button class="btn secondary small" data-edit="${b.id}">編輯</button>
+      <button class="btn small" data-detail="${b.id}">詳情</button>
+    </div>`;
     box.appendChild(el);
     el.querySelector("[data-edit]").addEventListener("click",()=>openBookModal(b));
+    el.querySelector("[data-detail]").addEventListener("click",()=>openBookDetail(b.id));
   });
 }
+
+function jumpToAdjacentBook(delta){
+  const list=sortedBooks();
+  if(!list.length) return;
+  const idx=Math.max(0,list.findIndex(b=>Number(b.id)===Number(state.detailBookId)));
+  const next=(idx+delta+list.length)%list.length;
+  state.detailBookId=list[next].id;
+  renderBookDetail();
+}
+
+function setDetailPeekCard(el,book){
+  if(!book){ el.style.opacity="0"; el.innerHTML=""; return; }
+  el.style.opacity=".95";
+  el.innerHTML = book.cover
+    ? `<img src="${escapeHTML(book.cover)}" alt="peek" style="width:100%;height:100%;object-fit:cover;"/>`
+    : `<span>${escapeHTML((book.title||"書").slice(0,2))}</span>`;
+}
+
+function renderBookDetail(){
+  const list=sortedBooks();
+  if(!list.length){
+    showView("books");
+    toast("目前沒有書籍");
+    return;
+  }
+  if(!getBookById(state.detailBookId)) state.detailBookId=list[0].id;
+  const idx=Math.max(0,list.findIndex(b=>Number(b.id)===Number(state.detailBookId)));
+  const prev=list[(idx-1+list.length)%list.length];
+  const cur=list[idx];
+  const next=list[(idx+1)%list.length];
+
+  $("#detailPosition").textContent=`${idx+1} / ${list.length}`;
+  const track=$("#detailTrack");
+  track.innerHTML=[prev,cur,next].map((b,i)=>`<article class="detailSlide" data-role="${i===1?'current':'side'}">
+    <div class="card" style="height:100%;">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;">
+        <div class="detailCover">${b.cover?`<img src="${escapeHTML(b.cover)}" alt="cover"/>`:'封面'}</div>
+        <div class="detailBody" style="flex:1;min-width:220px;">
+          <div class="detailTitle">${escapeHTML(b.title||'未命名書籍')}</div>
+          <div class="detailMeta">
+            <span class="chipTag">作者：${escapeHTML(b.author||'—')}</span>
+            <span class="chipTag">出版社：${escapeHTML(b.publisher||'—')}</span>
+            <span class="chipTag">分類：${escapeHTML(b.category||'—')}</span>
+            <span class="chipTag">閱讀方式：${escapeHTML(b.medium||'—')}</span>
+            <span class="chipTag">狀態：${escapeHTML(b.status||'—')}</span>
+            <span class="chipTag">星等：${"★".repeat(clamp(Number(b.rating||3),1,5))}${"☆".repeat(5-clamp(Number(b.rating||3),1,5))}</span>
+            <span class="chipTag">代表色：<span class="detailColor" style="background:${bookColor(b.id)}"></span></span>
+          </div>
+          <div class="detailKpi">
+            <div class="hint">累積閱讀時間</div>
+            <div class="big">${minutesToLongHM(totalMinutesForBook(b.id))}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>`).join('');
+  const reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  track.style.transition=reduce?'none':'transform .28s ease';
+  track.style.transform='translateX(-100%)';
+  setDetailPeekCard($("#detailPeekPrev"), prev);
+  setDetailPeekCard($("#detailPeekNext"), next);
+
+  $("#btnPrevBook").onclick=()=>jumpToAdjacentBook(-1);
+  $("#btnNextBook").onclick=()=>jumpToAdjacentBook(1);
+  $("#btnStartThisBook").onclick=()=>{
+    const date=$("#todayDate").value||toISODate(new Date());
+    showView("today");
+    $("#todayDate").value=date;
+    refreshBookSelects();
+    $("#todayBook").value=String(cur.id);
+    syncTimerButtons();
+    toast("已選好書籍，準備開始");
+  };
+}
+
+$("#detailSlider").addEventListener("touchstart",(e)=>{
+  const t=e.changedTouches&&e.changedTouches[0];
+  if(!t) return;
+  window.__detailTouch={x:t.clientX,y:t.clientY,time:Date.now()};
+},{passive:true});
+$("#detailSlider").addEventListener("touchend",(e)=>{
+  const t=e.changedTouches&&e.changedTouches[0];
+  const st=window.__detailTouch;
+  if(!t||!st) return;
+  const dx=t.clientX-st.x, dy=t.clientY-st.y;
+  if(Math.abs(dx)>44 && Math.abs(dx)>Math.abs(dy)*1.2){
+    if(dx<0) jumpToAdjacentBook(1); else jumpToAdjacentBook(-1);
+  }
+  window.__detailTouch=null;
+},{passive:true});
+$("#btnBackToBooks").addEventListener("click",()=>showView("books"));
+
 $("#btnAddBook").addEventListener("click",()=>openBookModal(null));
 
 /* Category manager */
@@ -1491,6 +1824,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
 (async function init(){
   $("#verChip").textContent = `v${APP_VER} full`;
+  renderQuoteBanner();
   try{ db=await idbOpen(); storageMode="idb"; $("#storageChip").textContent="已啟用 IndexedDB"; }
   catch(e){ console.warn("IndexedDB unavailable; using localStorage", e); storageMode="ls"; $("#storageChip").textContent="⚠️ IndexedDB 不可用，改用 localStorage"; }
 
@@ -1520,8 +1854,51 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   // Super important: avoid Service Worker on localhost to prevent "all clicks dead" due to cached broken builds
   const isLocal=(location.hostname==="127.0.0.1"||location.hostname==="localhost");
+  const SW_UPDATE_CONFIG={ autoApply:false, autoClaimClients:true };
+  function showAppUpdateBanner(reg){
+    const bar=$("#updateBanner");
+    if(!bar) return;
+    bar.classList.add("show");
+    const btn=$("#btnUpdateNow");
+    if(btn){
+      btn.onclick=()=>{
+        if(reg?.waiting){
+          reg.waiting.postMessage({type:"SKIP_WAITING"});
+          if(SW_UPDATE_CONFIG.autoClaimClients) reg.waiting.postMessage({type:"CLAIM_CLIENTS"});
+          btn.disabled=true;
+          btn.textContent="更新中...";
+        }
+      };
+    }
+  }
+  window.__debugShowUpdateBanner=()=>showAppUpdateBanner({waiting:{postMessage:()=>{}}});
+
   if(!isLocal && "serviceWorker" in navigator){
-    navigator.serviceWorker.register("./sw.js").catch(console.warn);
+    try{
+      const reg=await navigator.serviceWorker.register("./sw.js");
+
+      navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+        if(window.__swRefreshing) return;
+        window.__swRefreshing=true;
+        location.reload();
+      });
+
+      if(reg.waiting){
+        if(SW_UPDATE_CONFIG.autoApply){ reg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) reg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
+        else showAppUpdateBanner(reg);
+      }
+
+      reg.addEventListener("updatefound", ()=>{
+        const nw=reg.installing;
+        if(!nw) return;
+        nw.addEventListener("statechange", ()=>{
+          if(nw.state==="installed" && navigator.serviceWorker.controller){
+            if(SW_UPDATE_CONFIG.autoApply){ reg.waiting?.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) reg.waiting?.postMessage({type:"CLAIM_CLIENTS"}); }
+            else showAppUpdateBanner(reg);
+          }
+        });
+      });
+    }catch(e){ console.warn(e); }
   }
 })();
 </script>
