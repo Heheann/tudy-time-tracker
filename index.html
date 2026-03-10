@@ -8,7 +8,7 @@
   <link rel="manifest" href="./manifest.json" />
   <style>
     :root{
-   --bg:#fff8f7;
+      --bg:#fff8f7;
       --bg2:#fdeff2;
       --bg-soft:#fdeff2;
       --ink:#3a2f34;
@@ -182,12 +182,10 @@
       background:linear-gradient(145deg, rgba(244,217,229,.46), rgba(255,255,255,.56));
       border:1px solid rgba(223,173,186,.28)
     }
-
     .kpi .big{font-size:22px;font-weight:900}
     .kpi .small{font-size:12px;color:var(--muted)}
 
     .list{display:grid;gap:10px}
-
     .item{
       padding:12px;
       border-radius:16px;
@@ -199,7 +197,11 @@
     .meta{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.5}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
     .chipTag{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);
-background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:nowrap}
+      background:rgba(255,255,255,.82);
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap
+    }
     .cover{width:44px;height:58px;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.06);background:rgba(240,221,230,.65);flex:0 0 auto}
     .cover img{width:100%;height:100%;object-fit:cover}
     .dot{width:10px;height:10px;border-radius:4px;border:1px solid rgba(0,0,0,.06);display:inline-block}
@@ -243,7 +245,6 @@ background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:n
 
     .tabBtn strong{font-size:13px}
     .tabBtn span{font-size:16px}
-
     .tabBtn.active{
       background:linear-gradient(180deg, rgba(223,173,186,.42), rgba(216,196,232,.28));
       border-color:rgba(223,173,186,.62);
@@ -352,6 +353,102 @@ background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:n
     .toggleRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .smallNote{font-size:12px;color:var(--muted)}
 
+    /* Book detail page */
+    #view-book-detail .card{overflow:hidden}
+    .detailHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+
+    .detailSlider{
+      position:relative;
+      overflow:hidden;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.38);
+      padding:8px 0;
+      touch-action:pan-y;
+    }
+
+    .detailTrack{display:flex;align-items:stretch;transition:transform .28s ease}
+
+    .detailSlide{flex:0 0 100%;padding:0 10%}
+
+    .detailPeek{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:14%;
+      min-width:46px;
+      aspect-ratio:3/4;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:linear-gradient(145deg, rgba(255,255,255,.88), rgba(244,217,229,.58));
+      box-shadow:var(--shadow-soft);
+      pointer-events:none;
+      opacity:.9;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-size:12px;
+      overflow:hidden;
+    }
+
+    .detailPeek.left{left:-5%}
+    .detailPeek.right{right:-5%}
+
+    .detailCover{
+      width:min(220px,45vw);
+      aspect-ratio:3/4;
+      border-radius:18px;
+      border:1px solid var(--line);
+      overflow:hidden;
+      background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(216,196,232,.4));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.04em
+    }
+
+    .detailCover img{width:100%;height:100%;object-fit:cover}
+
+    .detailBody{display:grid;gap:10px;align-content:start}
+
+    .detailTitle{font-size:24px;font-weight:900;line-height:1.2}
+
+    .detailMeta{display:flex;flex-wrap:wrap;gap:8px}
+
+    .detailKpi{
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(223,173,186,.28);
+      background:linear-gradient(145deg, rgba(244,217,229,.5), rgba(255,255,255,.7))
+    }
+
+    .detailKpi .big{font-size:28px;font-weight:900}
+
+    .detailColor{
+      width:18px;
+      height:18px;
+      border-radius:6px;
+      border:1px solid rgba(0,0,0,.08);
+      display:inline-block;
+      vertical-align:middle
+    }
+
+    .detailNavBtns{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:10px
+    }
+
+    .detailArrow{min-width:44px}
+
+    @media (prefers-reduced-motion: reduce){
+      .detailTrack{transition:none}
+    }
     /* Masonry lists for gallery feeling */
     #bookList,#rankList{column-count:1;column-gap:10px;display:block}
     #bookList .item,#rankList .item{break-inside:avoid;display:inline-block;width:100%;margin:0 0 10px}
@@ -375,6 +472,7 @@ background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:n
         padding:12px;
         gap:8px
       }
+
       .tabBtn{min-height:64px}
 
       section.grid{grid-template-columns:repeat(12,minmax(0,1fr));}
@@ -395,9 +493,10 @@ background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:n
       #view-rank .card:nth-child(1){grid-column:span 5}
       #view-rank .card:nth-child(2){grid-column:span 7}
 
+      #view-book-detail .card{grid-column:span 12}
+
       #bookList,#rankList{column-count:2;column-gap:12px}
     }
-
     @media (min-width: 1300px){
       #bookList,#rankList{column-count:3}
     }
@@ -488,6 +587,26 @@ background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:n
         <h2>我的書</h2>
         <div class="list" id="bookList"></div>
         <div class="hint" id="bookEmpty" style="display:none;">目前還沒有書籍。按「新增書籍」開始建立你的閱讀宇宙 ✨</div>
+      </div>
+    </section>
+
+    <!-- Book Detail -->
+    <section id="view-book-detail" class="grid" style="display:none;">
+      <div class="card">
+        <div class="detailHead">
+          <button class="btn secondary small" id="btnBackToBooks">← 回到書庫</button>
+          <div class="hint" id="detailPosition">—</div>
+        </div>
+        <div class="detailSlider" id="detailSlider">
+          <div class="detailPeek left" id="detailPeekPrev"></div>
+          <div class="detailTrack" id="detailTrack"></div>
+          <div class="detailPeek right" id="detailPeekNext"></div>
+        </div>
+        <div class="detailNavBtns">
+          <button class="btn secondary small detailArrow" id="btnPrevBook">← 上一本</button>
+          <button class="btn" id="btnStartThisBook">▶️ 立刻開始讀這本</button>
+          <button class="btn secondary small detailArrow" id="btnNextBook">下一本 →</button>
+        </div>
       </div>
     </section>
 
@@ -784,7 +903,8 @@ let state={
   categories:["文學","歷史","財經"],
   meta:{},
   stackFilter:"all",
-  selectedBooks:[] // for custom stack
+  selectedBooks:[], // for custom stack
+  detailBookId:null
 };
 
 function ensureDefaultBook(){
@@ -804,6 +924,17 @@ function bookColor(id){
   return normalizeHexToRGBA(b?.color)||b?.color||"rgba(215,160,179,.75)";
 }
 function bookName(id){ return getBookById(id)?.title || "（已刪除的書）"; }
+function sortedBooks(){
+  return state.books.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"zh-Hant"));
+}
+function totalMinutesForBook(bookId){
+  return state.sessions.filter(s=>Number(s.bookId)===Number(bookId)).reduce((a,s)=>a+Number(s.durationMinutes||0),0);
+}
+function minutesToLongHM(m){
+  const min=Math.max(0,Math.round(m||0));
+  const h=Math.floor(min/60); const mm=min%60;
+  return `${h}h ${String(mm).padStart(2,"0")}m`;
+}
 
 function refreshBookSelects(){
   const opts=state.books.slice()
@@ -826,10 +957,11 @@ $("#modalMask").addEventListener("click",(e)=>{ if(e.target.id==="modalMask") cl
 ========================= */
 function showView(name){
   state.view=name;
-  ["today","books","logs","stats","rank"].forEach(v=>$("#view-"+v).style.display=(v===name)?"":"none");
+  ["today","books","book-detail","logs","stats","rank"].forEach(v=>$("#view-"+v).style.display=(v===name)?"":"none");
   $$("#tabs .tabBtn").forEach(btn=>btn.classList.toggle("active", btn.dataset.view===name));
   if(name==="today") renderToday();
   if(name==="books") renderBooks();
+  if(name==="book-detail") renderBookDetail();
   if(name==="logs") renderLogs();
   if(name==="stats") renderStats();
   if(name==="rank") renderRank();
@@ -1121,10 +1253,15 @@ function openBookModal(book=null){
   }
 }
 
+function openBookDetail(bookId){
+  state.detailBookId=Number(bookId);
+  showView("book-detail");
+}
+
 function renderBooks(){
   $("#bookEmpty").style.display=state.books.length?"none":"block";
   const box=$("#bookList"); box.innerHTML="";
-  state.books.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""),"zh-Hant")).forEach(b=>{
+  sortedBooks().forEach(b=>{
     const el=document.createElement("div");
     el.className="item";
     el.innerHTML=`<div class="itemTitle">
@@ -1147,11 +1284,107 @@ function renderBooks(){
       <span class="chipTag">狀態：${escapeHTML(b.status||"")}</span>
       <span class="chipTag">閱讀：${escapeHTML(b.medium||"")}</span>
     </div>
-    <div class="row" style="margin-top:10px;"><button class="btn secondary small" data-edit="${b.id}">編輯</button></div>`;
+    <div class="row" style="margin-top:10px;">
+      <button class="btn secondary small" data-edit="${b.id}">編輯</button>
+      <button class="btn small" data-detail="${b.id}">詳情</button>
+    </div>`;
     box.appendChild(el);
     el.querySelector("[data-edit]").addEventListener("click",()=>openBookModal(b));
+    el.querySelector("[data-detail]").addEventListener("click",()=>openBookDetail(b.id));
   });
 }
+
+function jumpToAdjacentBook(delta){
+  const list=sortedBooks();
+  if(!list.length) return;
+  const idx=Math.max(0,list.findIndex(b=>Number(b.id)===Number(state.detailBookId)));
+  const next=(idx+delta+list.length)%list.length;
+  state.detailBookId=list[next].id;
+  renderBookDetail();
+}
+
+function setDetailPeekCard(el,book){
+  if(!book){ el.style.opacity="0"; el.innerHTML=""; return; }
+  el.style.opacity=".95";
+  el.innerHTML = book.cover
+    ? `<img src="${escapeHTML(book.cover)}" alt="peek" style="width:100%;height:100%;object-fit:cover;"/>`
+    : `<span>${escapeHTML((book.title||"書").slice(0,2))}</span>`;
+}
+
+function renderBookDetail(){
+  const list=sortedBooks();
+  if(!list.length){
+    showView("books");
+    toast("目前沒有書籍");
+    return;
+  }
+  if(!getBookById(state.detailBookId)) state.detailBookId=list[0].id;
+  const idx=Math.max(0,list.findIndex(b=>Number(b.id)===Number(state.detailBookId)));
+  const prev=list[(idx-1+list.length)%list.length];
+  const cur=list[idx];
+  const next=list[(idx+1)%list.length];
+
+  $("#detailPosition").textContent=`${idx+1} / ${list.length}`;
+  const track=$("#detailTrack");
+  track.innerHTML=[prev,cur,next].map((b,i)=>`<article class="detailSlide" data-role="${i===1?'current':'side'}">
+    <div class="card" style="height:100%;">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;">
+        <div class="detailCover">${b.cover?`<img src="${escapeHTML(b.cover)}" alt="cover"/>`:'封面'}</div>
+        <div class="detailBody" style="flex:1;min-width:220px;">
+          <div class="detailTitle">${escapeHTML(b.title||'未命名書籍')}</div>
+          <div class="detailMeta">
+            <span class="chipTag">作者：${escapeHTML(b.author||'—')}</span>
+            <span class="chipTag">出版社：${escapeHTML(b.publisher||'—')}</span>
+            <span class="chipTag">分類：${escapeHTML(b.category||'—')}</span>
+            <span class="chipTag">閱讀方式：${escapeHTML(b.medium||'—')}</span>
+            <span class="chipTag">狀態：${escapeHTML(b.status||'—')}</span>
+            <span class="chipTag">星等：${"★".repeat(clamp(Number(b.rating||3),1,5))}${"☆".repeat(5-clamp(Number(b.rating||3),1,5))}</span>
+            <span class="chipTag">代表色：<span class="detailColor" style="background:${bookColor(b.id)}"></span></span>
+          </div>
+          <div class="detailKpi">
+            <div class="hint">累積閱讀時間</div>
+            <div class="big">${minutesToLongHM(totalMinutesForBook(b.id))}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>`).join('');
+  const reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  track.style.transition=reduce?'none':'transform .28s ease';
+  track.style.transform='translateX(-100%)';
+  setDetailPeekCard($("#detailPeekPrev"), prev);
+  setDetailPeekCard($("#detailPeekNext"), next);
+
+  $("#btnPrevBook").onclick=()=>jumpToAdjacentBook(-1);
+  $("#btnNextBook").onclick=()=>jumpToAdjacentBook(1);
+  $("#btnStartThisBook").onclick=()=>{
+    const date=$("#todayDate").value||toISODate(new Date());
+    showView("today");
+    $("#todayDate").value=date;
+    refreshBookSelects();
+    $("#todayBook").value=String(cur.id);
+    syncTimerButtons();
+    toast("已選好書籍，準備開始");
+  };
+}
+
+$("#detailSlider").addEventListener("touchstart",(e)=>{
+  const t=e.changedTouches&&e.changedTouches[0];
+  if(!t) return;
+  window.__detailTouch={x:t.clientX,y:t.clientY,time:Date.now()};
+},{passive:true});
+$("#detailSlider").addEventListener("touchend",(e)=>{
+  const t=e.changedTouches&&e.changedTouches[0];
+  const st=window.__detailTouch;
+  if(!t||!st) return;
+  const dx=t.clientX-st.x, dy=t.clientY-st.y;
+  if(Math.abs(dx)>44 && Math.abs(dx)>Math.abs(dy)*1.2){
+    if(dx<0) jumpToAdjacentBook(1); else jumpToAdjacentBook(-1);
+  }
+  window.__detailTouch=null;
+},{passive:true});
+$("#btnBackToBooks").addEventListener("click",()=>showView("books"));
+
 $("#btnAddBook").addEventListener("click",()=>openBookModal(null));
 
 /* Category manager */
