@@ -4,8 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#D7A0B3" />
+  <meta name="app-build" content="2026.03.11.3" />
   <title>Hours Between Pages</title>
-  <link rel="manifest" href="./manifest.json" />
+  <link rel="manifest" id="appManifest" href="./manifest.json" />
+  <script>
+    (()=>{
+      const v=document.querySelector('meta[name="app-build"]')?.content;
+      const mf=document.getElementById('appManifest');
+      if(v&&mf) mf.setAttribute('href',`./manifest.json?v=${encodeURIComponent(v)}`);
+    })();
+  </script>
   <style>
     :root{
       --bg:#fff8f7;
@@ -973,6 +981,11 @@
 ========================= */
 const $ = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const APP_BUILD_VERSION=(document.querySelector('meta[name="app-build"]')?.content||"dev").trim();
+function assetWithBuild(path){
+  const joiner=path.includes("?")?"&":"?";
+  return `${path}${joiner}v=${encodeURIComponent(APP_BUILD_VERSION)}`;
+}
 function toast(msg){
   const el=$("#toast");
   el.textContent=msg;
@@ -2506,7 +2519,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   if(!isLocal && "serviceWorker" in navigator){
     try{
-      swReg=await navigator.serviceWorker.register("./sw.js");
+      swReg=await navigator.serviceWorker.register(assetWithBuild("./sw.js"));
       $("#btnCheckUpdate")?.addEventListener("click",()=>checkForAppUpdate(true));
 
       navigator.serviceWorker.addEventListener("controllerchange", ()=>{
