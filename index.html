@@ -262,6 +262,11 @@
     .focusTip{font-size:calc(12px * var(--focus-scale));color:rgba(255,236,241,.8)}
 
     @media (max-width: 720px){
+      .timerHero{padding:10px}
+      .timerHeroActions .focusBtn{
+        padding:calc(8px * var(--hero-scale)) calc(10px * var(--hero-scale));
+        font-size:calc(14px * var(--hero-scale));
+      }
       .focusControls{max-width:340px}
     }
     @media (orientation: portrait) and (max-width: 900px){
@@ -1232,12 +1237,19 @@ function updateFlipResponsiveScales(){
   if(hero&&timerFlip){
     const cs=getComputedStyle(hero);
     const padX=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
-    const availW=Math.max(280, hero.clientWidth-padX-2);
+    const availW=Math.max(220, hero.clientWidth-padX-2);
     const widthScale=availW/TIMER_CLOCK_BASE_WIDTH;
     const heightScale=(window.innerHeight*0.34)/220;
-    const heroScale=clampScale(Math.min(widthScale,heightScale),0.64,1);
+    let heroScale=clampScale(Math.min(widthScale,heightScale),0.48,1);
     setScale(hero,'--hero-scale',heroScale.toFixed(3));
     setScale(timerFlip,'--clock-scale',heroScale.toFixed(3));
+
+    const overflowRatio=timerFlip.scrollWidth/Math.max(1,timerFlip.clientWidth);
+    if(overflowRatio>1){
+      heroScale=clampScale(heroScale/overflowRatio,0.42,1);
+      setScale(hero,'--hero-scale',heroScale.toFixed(3));
+      setScale(timerFlip,'--clock-scale',heroScale.toFixed(3));
+    }
   }
   const ov=$("#focusOverlay");
   const focusClock=$("#focusTimerFlip");
