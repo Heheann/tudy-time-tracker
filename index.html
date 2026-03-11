@@ -4,8 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#D7A0B3" />
+  <meta name="app-build" content="2026.03.11.4" />
   <title>Hours Between Pages</title>
-  <link rel="manifest" href="./manifest.json" />
+  <link rel="manifest" id="appManifest" href="./manifest.json" />
+  <script>
+    (()=>{
+      const v=document.querySelector('meta[name="app-build"]')?.content;
+      const mf=document.getElementById('appManifest');
+      if(v&&mf) mf.setAttribute('href',`./manifest.json?v=${encodeURIComponent(v)}`);
+    })();
+  </script>
   <style>
     :root{
       --bg:#fff8f7;
@@ -132,6 +140,154 @@
     .hint{font-size:12px;color:var(--muted)}
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .rowBetween{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+    .timerHero{
+      --hero-scale:1;
+      background:linear-gradient(165deg, rgba(255,179,191,.94), rgba(244,149,168,.9));
+      border:1px solid rgba(204,104,126,.34);
+      box-shadow:0 24px 52px rgba(168,87,108,.26);
+      color:#fff6f7;
+      position:relative;
+      overflow:hidden;
+    }
+    .timerHero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at 16% 10%, rgba(255,225,231,.42), transparent 52%);
+      pointer-events:none;
+    }
+    .timerHeroTop{display:flex;justify-content:space-between;align-items:center;gap:calc(8px * var(--hero-scale));position:relative;z-index:1}
+    .timerLabel{font-size:calc(12px * var(--hero-scale));letter-spacing:.12em;color:rgba(255,239,242,.82)}
+    .timerHeroStatus{font-size:calc(12px * var(--hero-scale));color:rgba(255,239,242,.82)}
+    .timerFlip,.focusClock{
+      --clock-scale:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:nowrap;
+      position:relative;
+      z-index:1;
+      max-width:100%;
+    }
+    .timerFlip{margin-top:calc(12px * var(--hero-scale));gap:calc(10px * var(--clock-scale))}
+    .focusClock{gap:calc(14px * var(--clock-scale))}
+    .timerFlip .flipPair,.focusClock .flipPair{display:flex;gap:calc(8px * var(--clock-scale))}
+    .flipDigit{
+      aspect-ratio:3/4;
+      border:1px solid rgba(253,217,224,.55);
+      background:linear-gradient(180deg, rgba(255,241,244,.98), rgba(255,219,227,.95));
+      box-shadow:inset 0 1px 0 rgba(255,253,254,.78), 0 10px 20px rgba(170,96,118,.24);
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      color:#6f3343;
+      text-shadow:0 1px 0 rgba(255,248,250,.78);
+      font-variant-numeric:tabular-nums;
+      transform-style:preserve-3d;
+      backface-visibility:hidden;
+    }
+    .timerFlip .flipDigit{
+      width:calc(82px * var(--clock-scale));
+      border-radius:calc(16px * var(--clock-scale));
+      font-size:calc(46px * var(--clock-scale));
+    }
+    .focusClock .flipDigit{
+      width:calc(170px * var(--clock-scale));
+      border-radius:calc(24px * var(--clock-scale));
+      font-size:calc(108px * var(--clock-scale));
+    }
+    .flipDigit::after{
+      content:"";
+      position:absolute;
+      left:calc(8px * var(--clock-scale)); right:calc(8px * var(--clock-scale)); top:50%;
+      border-top:1px solid rgba(255,245,248,.72);
+      border-bottom:1px solid rgba(180,102,123,.28);
+    }
+    .timerFlip .flipSep{
+      font-size:calc(44px * var(--clock-scale));
+      line-height:1;
+      color:rgba(255,229,235,.86);
+      font-weight:800;
+      transform:translateY(calc(-4px * var(--clock-scale)));
+    }
+    .focusClock .flipSep{
+      font-size:calc(92px * var(--clock-scale));
+      line-height:1;
+      color:rgba(255,229,235,.86);
+      font-weight:800;
+      transform:translateY(calc(-8px * var(--clock-scale)));
+    }
+    .flipDigit.flipAnim{animation:flipPulse .42s ease}
+    @keyframes flipPulse{
+      0%{transform:rotateX(0deg)}
+      40%{transform:rotateX(-16deg)}
+      100%{transform:rotateX(0deg)}
+    }
+    .timerHeroActions{margin-top:calc(14px * var(--hero-scale));display:flex;justify-content:center;position:relative;z-index:1}
+    .timerHeroActions .focusBtn{
+      min-height:calc(40px * var(--hero-scale));
+      padding:calc(10px * var(--hero-scale)) calc(12px * var(--hero-scale));
+      border-radius:calc(14px * var(--hero-scale));
+      font-size:calc(16px * var(--hero-scale));
+    }
+    .focusBtn{
+      border-color:rgba(255,216,225,.62);
+      background:rgba(255,235,240,.28);
+      color:#fff6f8;
+      box-shadow:inset 0 1px 0 rgba(255,247,249,.45);
+    }
+    .focusBtn:hover{background:rgba(255,238,242,.4)}
+
+    .focusOverlay{
+      --focus-scale:1;
+      position:fixed;
+      inset:0;
+      z-index:180;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:linear-gradient(160deg, #ffb3bf 0%, #f197ac 38%, #e07b95 100%);
+      color:#fff6f7;
+    }
+    .focusOverlay.show{display:flex}
+    .focusContent{width:min(1200px,100%);max-height:100%;display:grid;gap:calc(22px * var(--focus-scale));justify-items:center}
+    .focusHint{font-size:calc(12px * var(--focus-scale));letter-spacing:.08em;color:rgba(255,236,241,.8)}
+    .focusControls{
+      display:flex; gap:calc(10px * var(--focus-scale)); flex-wrap:wrap; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .25s ease;
+    }
+    .focusOverlay.controlsVisible .focusControls{opacity:1;pointer-events:auto}
+    .focusControls .btn{
+      min-height:calc(46px * var(--focus-scale));
+      padding:calc(12px * var(--focus-scale)) calc(14px * var(--focus-scale));
+      border-radius:calc(16px * var(--focus-scale));
+      font-size:calc(16px * var(--focus-scale));
+    }
+    .focusTip{font-size:calc(12px * var(--focus-scale));color:rgba(255,236,241,.8)}
+
+    .autoStopRow{align-items:end;gap:12px}
+    .autoStopToggle{white-space:nowrap}
+    .autoStopMinutesWrap{width:170px;max-width:100%}
+
+    @media (max-width: 720px){
+      .autoStopRow{align-items:stretch;gap:8px}
+      .autoStopToggle{width:100%}
+      .autoStopMinutesWrap{width:100%}
+      .timerHero{padding:10px}
+      .timerHeroActions .focusBtn{
+        padding:calc(8px * var(--hero-scale)) calc(10px * var(--hero-scale));
+        font-size:calc(14px * var(--hero-scale));
+      }
+      .focusControls{max-width:340px}
+    }
+    @media (orientation: portrait) and (max-width: 900px){
+      .focusTip::before{content:"建議橫向使用沉靜模式 · ";}
+    }
+
     label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
     input,select,textarea{
       width:100%;
@@ -554,11 +710,6 @@
       <span id="updateBannerText">有新版本可用</span>
       <button class="btn small" id="btnUpdateNow" style="min-height:34px;padding:6px 10px;">立即更新</button>
     </div>
-    <div class="sub" id="quoteBanner">✦ 載入今日名言中…</div>
-<div class="sub updateBanner" id="updateBanner" style="display:none;">
-  <span>有新版本可用</span>
-  <button class="btn small" id="btnUpdateNow" style="min-height:34px;padding:6px 10px;">立即更新</button>
-</div>
   </header>
 
   <main>
@@ -578,14 +729,34 @@
             <input id="todayDate" type="date" />
           </div>
         </div>
-        <div class="row" style="margin-top:10px;">
+        <div class="card timerHero" style="margin-top:10px;">
+          <div class="timerHeroTop">
+            <div class="timerLabel">READING CEREMONY TIMER</div>
+            <div class="timerHeroStatus" id="timerStatusText">尚未開始</div>
+          </div>
+          <div class="timerFlip" id="timerFlip"></div>
+          <div class="timerHeroActions">
+            <button class="btn secondary small focusBtn" id="btnFocusMode">🪞 進入全螢幕沉靜模式</button>
+          </div>
+          <div style="display:none;" id="timerText">00:00:00</div>
+        </div>
+        <div class="row autoStopRow" style="margin-top:10px;align-items:end;">
+          <label class="autoStopToggle" style="display:flex;align-items:center;gap:8px;margin:0;">
+            <input id="todayAutoStopEnabled" type="checkbox" style="width:auto;" checked />
+            <span>到點自動存檔</span>
+          </label>
+          <div class="autoStopMinutesWrap" style="width:170px;">
+            <label for="todayAutoStopMinutes">目標分鐘數</label>
+            <input id="todayAutoStopMinutes" type="number" min="1" max="600" step="1" value="30" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px;">
           <button class="btn" id="btnStart">▶️ 開始</button>
           <button class="btn secondary" id="btnPause" disabled>⏸ 暫停</button>
           <button class="btn secondary" id="btnStop" disabled>⏹ 結束並存檔</button>
         </div>
-        <div class="rowBetween" style="margin-top:10px;">
-          <div class="pill">⏱️ <strong id="timerText">00:00:00</strong></div>
-          <button class="btn secondary small" id="btnManualToday">✍️ 手動新增（幾點到幾點）</button>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn secondary" id="btnManualToday">✍️ 手動新增（幾點到幾點）</button>
         </div>
       </div>
 
@@ -802,12 +973,31 @@
     </div>
   </div>
 
+  <div class="focusOverlay" id="focusOverlay">
+    <div class="focusContent">
+      <div class="focusHint">沉靜閱讀模式</div>
+      <div class="focusClock" id="focusTimerFlip"></div>
+      <div class="focusControls" id="focusControls">
+        <button class="btn" id="btnFocusStart">▶️ 開始</button>
+        <button class="btn secondary" id="btnFocusPause">⏸ 暫停</button>
+        <button class="btn secondary" id="btnFocusStop">⏹ 結束並存檔</button>
+        <button class="btn secondary" id="btnExitFocus">↩︎ 離開沉靜模式</button>
+      </div>
+      <div class="focusTip">點擊畫面可顯示控制按鈕，稍後會自動淡出。</div>
+    </div>
+  </div>
+
 <script>
 /* =========================
    Utilities
 ========================= */
 const $ = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const APP_BUILD_VERSION=(document.querySelector('meta[name="app-build"]')?.content||"dev").trim();
+function assetWithBuild(path){
+  const joiner=path.includes("?")?"&":"?";
+  return `${path}${joiner}v=${encodeURIComponent(APP_BUILD_VERSION)}`;
+}
 function toast(msg){
   const el=$("#toast");
   el.textContent=msg;
@@ -903,7 +1093,7 @@ function renderQuoteBanner(){
 /* =========================
    Storage (IDB + LS fallback)
 ========================= */
-const APP_VER="3.1";
+const APP_VER="3.2";
 const DB_NAME="reading_timer_pwa_v3"; const DB_VERSION=1;
 let db=null; let storageMode="ls";
 const LS_KEYS={
@@ -1055,11 +1245,94 @@ $("#tabs").addEventListener("click",(e)=>{ const btn=e.target.closest(".tabBtn")
 /* =========================
    Timer
 ========================= */
-let timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null};
+const DEFAULT_AUTO_STOP_MINUTES=30;
+let timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null,autoStopEnabled:true,autoStopMinutes:DEFAULT_AUTO_STOP_MINUTES};
 let tickT=null;
-function loadTimer(){ const saved=lsLoad(LS_KEYS.timer,null); if(saved&&typeof saved==="object") timerState=saved; }
+let lastTimerHMS="00:00:00";
+let focusControlTimer=null;
+let autoStopPending=false;
+const flipCache=new WeakMap();
+const TIMER_CLOCK_BASE_WIDTH=644;
+const FOCUS_CLOCK_BASE_WIDTH=1302;
+const FOCUS_LAYOUT_BASE_HEIGHT=348;
+const resizeObserver=(typeof ResizeObserver!=='undefined')?new ResizeObserver(()=>{ requestAnimationFrame(updateFlipResponsiveScales); }):null;
+function clampScale(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function setScale(el, name, value){ if(el) el.style.setProperty(name, String(value)); }
+function updateFlipResponsiveScales(){
+  const hero=document.querySelector('#view-today .timerHero');
+  const timerFlip=$("#timerFlip");
+  if(hero&&timerFlip){
+    const cs=getComputedStyle(hero);
+    const padX=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+    const availW=Math.max(220, hero.clientWidth-padX-2);
+    const widthScale=availW/TIMER_CLOCK_BASE_WIDTH;
+    const heightScale=(window.innerHeight*0.34)/220;
+    let heroScale=clampScale(Math.min(widthScale,heightScale),0.48,1);
+    setScale(hero,'--hero-scale',heroScale.toFixed(3));
+    setScale(timerFlip,'--clock-scale',heroScale.toFixed(3));
+
+    const overflowRatio=timerFlip.scrollWidth/Math.max(1,timerFlip.clientWidth);
+    if(overflowRatio>1){
+      heroScale=clampScale(heroScale/overflowRatio,0.42,1);
+      setScale(hero,'--hero-scale',heroScale.toFixed(3));
+      setScale(timerFlip,'--clock-scale',heroScale.toFixed(3));
+    }
+  }
+  const ov=$("#focusOverlay");
+  const focusClock=$("#focusTimerFlip");
+  if(ov&&focusClock){
+    const availW=Math.max(320, ov.clientWidth-40);
+    const availH=Math.max(220, ov.clientHeight-40);
+    const focusScale=clampScale(Math.min(availW/FOCUS_CLOCK_BASE_WIDTH, availH/FOCUS_LAYOUT_BASE_HEIGHT),0.34,1);
+    setScale(ov,'--focus-scale',focusScale.toFixed(3));
+    setScale(focusClock,'--clock-scale',focusScale.toFixed(3));
+  }
+}
+function normalizeAutoStopMinutes(v){ return clamp(Math.round(Number(v)||DEFAULT_AUTO_STOP_MINUTES),1,600); }
+function getAutoStopPrefs(){
+  const enabled=state.meta.autoStopEnabled!==false;
+  const minutes=normalizeAutoStopMinutes(state.meta.autoStopMinutes);
+  return {enabled,minutes};
+}
+function applyAutoStopPrefsToUI(){
+  const {enabled,minutes}=getAutoStopPrefs();
+  if($("#todayAutoStopEnabled")) $("#todayAutoStopEnabled").checked=enabled;
+  if($("#todayAutoStopMinutes")) $("#todayAutoStopMinutes").value=String(minutes);
+}
+function syncRunningAutoStopFromUI(){
+  if(!timerState.startTs) return;
+  timerState.autoStopEnabled=!!$("#todayAutoStopEnabled")?.checked;
+  timerState.autoStopMinutes=normalizeAutoStopMinutes($("#todayAutoStopMinutes")?.value);
+  saveTimer();
+}
+async function persistAutoStopPrefs(){
+  const enabled=!!$("#todayAutoStopEnabled")?.checked;
+  const minutes=normalizeAutoStopMinutes($("#todayAutoStopMinutes")?.value);
+  state.meta.autoStopEnabled=enabled;
+  state.meta.autoStopMinutes=minutes;
+  await setMeta("autoStopEnabled",enabled);
+  await setMeta("autoStopMinutes",minutes);
+  if($("#todayAutoStopMinutes")) $("#todayAutoStopMinutes").value=String(minutes);
+  syncRunningAutoStopFromUI();
+}
+function loadTimer(){
+  const saved=lsLoad(LS_KEYS.timer,null);
+  if(saved&&typeof saved==="object"){
+    timerState={...timerState,...saved};
+    timerState.autoStopEnabled=saved.autoStopEnabled!==false;
+    timerState.autoStopMinutes=normalizeAutoStopMinutes(saved.autoStopMinutes);
+  }else{
+    const pref=getAutoStopPrefs();
+    timerState.autoStopEnabled=pref.enabled;
+    timerState.autoStopMinutes=pref.minutes;
+  }
+}
 function saveTimer(){ lsSave(LS_KEYS.timer,timerState); }
-function clearTimer(){ timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null}; lsSave(LS_KEYS.timer,null); }
+function clearTimer(){
+  const pref=getAutoStopPrefs();
+  timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null,autoStopEnabled:pref.enabled,autoStopMinutes:pref.minutes};
+  lsSave(LS_KEYS.timer,null);
+}
 function elapsedMs(){
   if(!timerState.startTs) return 0;
   const now=Date.now();
@@ -1073,34 +1346,99 @@ function fmtHMS(ms){
   const ss=String(s%60).padStart(2,"0");
   return `${hh}:${mm}:${ss}`;
 }
-function updateTimerUI(){ $("#timerText").textContent=fmtHMS(elapsedMs()); }
+function buildFlipClock(root){
+  if(!root) return;
+  root.innerHTML='';
+  const parts=[['h1','h2'],['m1','m2'],['s1','s2']];
+  parts.forEach((group,idx)=>{
+    const pair=document.createElement('div');
+    pair.className='flipPair';
+    group.forEach(name=>{
+      const d=document.createElement('div');
+      d.className='flipDigit';
+      d.dataset.digit=name;
+      d.textContent='0';
+      pair.appendChild(d);
+    });
+    root.appendChild(pair);
+    if(idx<2){ const sep=document.createElement('div'); sep.className='flipSep'; sep.textContent=':'; root.appendChild(sep); }
+  });
+  flipCache.set(root, Object.fromEntries(Array.from(root.querySelectorAll('.flipDigit')).map(el=>[el.dataset.digit, el])));
+}
+function getFlipDigits(root){
+  if(!flipCache.has(root)){
+    const map=Object.fromEntries(Array.from(root.querySelectorAll('.flipDigit')).map(el=>[el.dataset.digit, el]));
+    flipCache.set(root,map);
+  }
+  return flipCache.get(root);
+}
+function applyFlip(root,hms){
+  if(!root) return;
+  const [hh,mm,ss]=hms.split(':');
+  const next={h1:hh[0],h2:hh[1],m1:mm[0],m2:mm[1],s1:ss[0],s2:ss[1]};
+  const digits=getFlipDigits(root);
+  Object.entries(next).forEach(([k,v])=>{
+    const el=digits[k]; if(!el) return;
+    if(el.textContent!==v){
+      el.textContent=v;
+      el.classList.remove('flipAnim');
+      void el.offsetWidth;
+      el.classList.add('flipAnim');
+    }
+  });
+}
+function maybeAutoStop(ms){
+  if(autoStopPending||!timerState.running||!timerState.autoStopEnabled) return;
+  const targetMs=normalizeAutoStopMinutes(timerState.autoStopMinutes)*60000;
+  if(ms>=targetMs){
+    autoStopPending=true;
+    toast(`已達 ${normalizeAutoStopMinutes(timerState.autoStopMinutes)} 分鐘，自動存檔`);
+    runStop().finally(()=>{ autoStopPending=false; });
+  }
+}
+function updateTimerUI(){
+  const ms=elapsedMs();
+  const hms=fmtHMS(ms);
+  $("#timerText").textContent=hms;
+  applyFlip($("#timerFlip"), hms);
+  applyFlip($("#focusTimerFlip"), hms);
+  if(hms!==lastTimerHMS) lastTimerHMS=hms;
+  const st=$("#timerStatusText");
+  if(st) st.textContent=timerState.running?"正在專注閱讀":(timerState.startTs?"已暫停":"尚未開始");
+  maybeAutoStop(ms);
+}
 function startTick(){ clearInterval(tickT); tickT=setInterval(updateTimerUI,250); }
 function syncTimerButtons(){
   const hasBook=!!$("#todayBook").value;
-  $("#btnStart").disabled=!hasBook||timerState.running;
-  $("#btnPause").disabled=!timerState.running;
-  $("#btnStop").disabled=!timerState.startTs;
+  const startDisabled=!hasBook||timerState.running;
+  const pauseDisabled=!timerState.running;
+  const stopDisabled=!timerState.startTs;
+  $("#btnStart").disabled=startDisabled;
+  $("#btnPause").disabled=pauseDisabled;
+  $("#btnStop").disabled=stopDisabled;
+  $("#btnFocusStart").disabled=startDisabled;
+  $("#btnFocusPause").disabled=pauseDisabled;
+  $("#btnFocusStop").disabled=stopDisabled;
 }
-
-$("#btnStart").addEventListener("click",()=>{
+function runStart(){
   const bookId=Number($("#todayBook").value);
   if(!bookId){ toast("先選一本書"); return; }
   const date=$("#todayDate").value||toISODate(new Date());
   if(!timerState.startTs||timerState.bookId!==bookId||timerState.date!==date){
-    timerState={running:true,startTs:Date.now(),pauseAccum:0,pausedAt:null,bookId,date};
+    timerState={running:true,startTs:Date.now(),pauseAccum:0,pausedAt:null,bookId,date,autoStopEnabled:!!$("#todayAutoStopEnabled")?.checked,autoStopMinutes:normalizeAutoStopMinutes($("#todayAutoStopMinutes")?.value)};
   }else if(!timerState.running){
     timerState.running=true;
     timerState.pauseAccum+=(Date.now()-timerState.pausedAt);
     timerState.pausedAt=null;
   }
   saveTimer(); startTick(); updateTimerUI(); syncTimerButtons(); toast("開始計時");
-});
-$("#btnPause").addEventListener("click",()=>{
+}
+function runPause(){
   if(!timerState.running) return;
   timerState.running=false; timerState.pausedAt=Date.now();
-  saveTimer(); syncTimerButtons(); toast("已暫停");
-});
-$("#btnStop").addEventListener("click",async ()=>{
+  saveTimer(); syncTimerButtons(); updateTimerUI(); toast("已暫停");
+}
+async function runStop(){
   if(!timerState.startTs) return;
   const ms=elapsedMs();
   const minutes=Math.max(1,Math.round(ms/60000));
@@ -1117,7 +1455,62 @@ $("#btnStop").addEventListener("click",async ()=>{
   });
   await saveAll(); clearTimer(); updateTimerUI(); syncTimerButtons(); toast("已存檔");
   renderToday(); if(state.view==="stats") renderStats();
+}
+function showFocusControls(){
+  const ov=$("#focusOverlay");
+  if(!ov.classList.contains('show')) return;
+  ov.classList.add('controlsVisible');
+  clearTimeout(focusControlTimer);
+  focusControlTimer=setTimeout(()=>ov.classList.remove('controlsVisible'),2200);
+}
+async function openFocusMode(){
+  const ov=$("#focusOverlay");
+  ov.classList.add('show');
+  updateFlipResponsiveScales();
+  showFocusControls();
+  try{
+    if(document.fullscreenElement!==ov && ov.requestFullscreen) await ov.requestFullscreen();
+  }catch(e){ console.warn('fullscreen unavailable',e); }
+}
+async function closeFocusMode(){
+  const ov=$("#focusOverlay");
+  ov.classList.remove('show','controlsVisible');
+  clearTimeout(focusControlTimer);
+  try{
+    if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+  }catch(e){ console.warn('exit fullscreen failed',e); }
+}
+$("#btnStart").addEventListener("click",runStart);
+$("#btnPause").addEventListener("click",runPause);
+$("#btnStop").addEventListener("click",runStop);
+$("#btnFocusStart").addEventListener("click",runStart);
+$("#btnFocusPause").addEventListener("click",runPause);
+$("#btnFocusStop").addEventListener("click",runStop);
+$("#btnFocusMode").addEventListener("click",openFocusMode);
+$("#btnExitFocus").addEventListener("click",closeFocusMode);
+$("#todayAutoStopEnabled")?.addEventListener("change",()=>{ persistAutoStopPrefs(); });
+$("#todayAutoStopMinutes")?.addEventListener("change",()=>{ persistAutoStopPrefs(); });
+$("#todayAutoStopMinutes")?.addEventListener("blur",()=>{ persistAutoStopPrefs(); });
+$("#focusOverlay").addEventListener("click",(e)=>{
+  if(e.target.closest('.focusControls')) return;
+  showFocusControls();
 });
+document.addEventListener('fullscreenchange',()=>{
+  const ov=$("#focusOverlay");
+  if(!document.fullscreenElement && ov.classList.contains('show')) ov.classList.remove('show','controlsVisible');
+  updateFlipResponsiveScales();
+});
+buildFlipClock($("#timerFlip"));
+buildFlipClock($("#focusTimerFlip"));
+updateFlipResponsiveScales();
+window.addEventListener('resize', updateFlipResponsiveScales);
+window.addEventListener('orientationchange', updateFlipResponsiveScales);
+if(resizeObserver){
+  const hero=document.querySelector('#view-today .timerHero');
+  const focusContent=document.querySelector('#focusOverlay .focusContent');
+  if(hero) resizeObserver.observe(hero);
+  if(focusContent) resizeObserver.observe(focusContent);
+}
 
 /* Manual session (time range) */
 function openManualSessionModal(dateStr){
@@ -1206,6 +1599,7 @@ function renderToday(){
     });
   });
 
+  applyAutoStopPrefsToUI();
   loadTimer(); updateTimerUI(); syncTimerButtons();
 }
 
@@ -2136,6 +2530,8 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
   const sf=state.meta.stackFilter; if(sf) state.stackFilter=sf;
   const sel=state.meta.selectedBooks; if(Array.isArray(sel)) state.selectedBooks=sel;
   const goal=state.meta.monthlyGoalHours; if(goal!==undefined) $("#monthlyGoal").value=String(goal);
+  if(state.meta.autoStopEnabled===undefined) state.meta.autoStopEnabled=true;
+  if(state.meta.autoStopMinutes===undefined) state.meta.autoStopMinutes=DEFAULT_AUTO_STOP_MINUTES;
 
   ensureDefaultBook();
   refreshBookSelects();
@@ -2146,6 +2542,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
   $("#statsMonth").value=`${new Date().getFullYear()}-${pad2(new Date().getMonth()+1)}`;
   $("#stackFilter").value=state.stackFilter;
 
+  applyAutoStopPrefsToUI();
   loadTimer(); updateTimerUI(); syncTimerButtons();
 
   renderToday(); renderBooks(); renderLogs(); renderStats(); renderRank();
@@ -2196,7 +2593,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   if(!isLocal && "serviceWorker" in navigator){
     try{
-      swReg=await navigator.serviceWorker.register("./sw.js");
+      swReg=await navigator.serviceWorker.register(assetWithBuild("./service-worker.js"));
       $("#btnCheckUpdate")?.addEventListener("click",()=>checkForAppUpdate(true));
 
       navigator.serviceWorker.addEventListener("controllerchange", ()=>{
