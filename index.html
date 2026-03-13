@@ -1512,6 +1512,16 @@ document.addEventListener('fullscreenchange',()=>{
   if(!document.fullscreenElement && ov.classList.contains('show')) ov.classList.remove('show','controlsVisible');
   updateFlipResponsiveScales();
 });
+$("#btnResetTimer").addEventListener("click",()=>{
+  if(!timerState.startTs && fmtHMS(elapsedMs())==="00:00:00"){
+    toast("計時已是 00:00:00");
+    return;
+  }
+  clearTimer();
+  updateTimerUI();
+  syncTimerButtons();
+  toast("已歸零（未存檔）");
+});
 
 buildFlipClock($("#timerFlip"));
 buildFlipClock($("#focusTimerFlip"));
@@ -2569,18 +2579,23 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   // Super important: avoid Service Worker on localhost to prevent "all clicks dead" due to cached broken builds
   const isLocal=(location.hostname==="127.0.0.1"||location.hostname==="localhost");
-  const SW_UPDATE_CONFIG={ autoApply:false, autoClaimClients:true };
-  let swReg=null;
+const SW_UPDATE_CONFIG={
+  autoApply:false,
+  autoClaimClients:true,
+  checkIntervalMs:120000
+};
 
-  function showAppUpdateBanner(reg, message="有新版本可用"){
-    const bar=$("#updateBanner");
-    if(!bar) return;
+let swReg=null;
 
-    const txt=$("#updateBannerText");
-    if(txt) txt.textContent=message;
+function showAppUpdateBanner(reg, message="有新版本可用"){
+  const bar=$("#updateBanner");
+  if(!bar) return;
 
-    bar.classList.add("show");
+  const txt=$("#updateBannerText");
+  if(txt) txt.textContent=message;
 
+  bar.classList.add("show");
+}
     const btn=$("#btnUpdateNow");
     if(btn){
       btn.disabled=false;
@@ -2613,7 +2628,11 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   if(!isLocal && "serviceWorker" in navigator){
     try{
-swReg=await navigator.serviceWorker.register(assetWithBuild("./service-worker.js"));
+      swReg=await navigator.serviceWorker.register(
+        assetWithBuild("./service-worker.js"),
+        { updateViaCache: "none" }
+      );
+      await checkForAppUpdate(false);
       $("#btnCheckUpdate")?.addEventListener("click",()=>checkForAppUpdate(true));
 
       navigator.serviceWorker.addEventListener("controllerchange", ()=>{
@@ -2637,6 +2656,14 @@ swReg=await navigator.serviceWorker.register(assetWithBuild("./service-worker.js
           }
         });
       });
+
+      if(SW_UPDATE_CONFIG.checkIntervalMs>0){
+        setInterval(()=>checkForAppUpdate(false), SW_UPDATE_CONFIG.checkIntervalMs);
+      }
+      document.addEventListener("visibilitychange", ()=>{
+        if(document.visibilityState==="visible") checkForAppUpdate(false);
+      });
+      window.addEventListener("focus", ()=>checkForAppUpdate(false));
     }catch(e){ console.warn(e); }
   }else{
     $("#btnCheckUpdate")?.addEventListener("click",()=>toast("本機開發模式不啟用 SW"));
