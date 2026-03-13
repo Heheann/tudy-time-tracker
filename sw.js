@@ -1,9 +1,9 @@
-const CACHE_NAME="reading-timer-pwa-v3.4-update-flow";
+const CACHE_NAME="reading-timer-pwa-v3.4-auto-update";
 const ASSETS=["./","./index.html?v=3.4","./index.html","./manifest.json","./icon-192.png","./icon-512.png"];
 
 // Controllable update strategy
 const SW_UPDATE_STRATEGY={
-  autoSkipWaiting:false,
+  autoSkipWaiting:true,
   autoClaimClients:true
 };
 
@@ -21,7 +21,7 @@ self.addEventListener("activate",(e)=>{
 });
 
 self.addEventListener("message",(e)=>{
-  const type=e?.data?.type;
+  const type=(e && e.data) ? e.data.type : undefined;
   if(type==="SKIP_WAITING") self.skipWaiting();
   if(type==="CLAIM_CLIENTS") self.clients.claim();
 });
