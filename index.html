@@ -4,11 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#D7A0B3" />
+  <meta name="app-build" content="2026.03.11.4" />
   <title>Hours Between Pages</title>
-  <link rel="manifest" href="./manifest.json" />
+  <link rel="manifest" id="appManifest" href="./manifest.json" />
+  <script>
+    (()=>{
+      const v=document.querySelector('meta[name="app-build"]')?.content;
+      const mf=document.getElementById('appManifest');
+      if(v&&mf) mf.setAttribute('href', `./manifest.json?v=${encodeURIComponent(v)}`);
+    })();
+  </script>
   <style>
     :root{
       --bg:#fff8f7;
+      --bg2:#fdeff2;
       --bg-soft:#fdeff2;
       --ink:#3a2f34;
       --muted:#7f7076;
@@ -18,6 +27,8 @@
       --accent:#dfadba;
       --accent-2:#c89b8d;
       --accent-3:#f4d9e5;
+      --accent2:#c89b8d;
+      --accent3:#f4d9e5;
       --peach:#f3bc9f;
       --lav:#d8c4e8;
       --ok:#86b896;
@@ -25,6 +36,7 @@
       --err:#cb8888;
       --shadow:0 20px 42px rgba(113,80,94,.14);
       --shadow-soft:0 10px 24px rgba(113,80,94,.10);
+      --shadow2:0 10px 24px rgba(113,80,94,.10);
       --radius:22px;
       --tap:52px;
       --font: ui-rounded, system-ui, -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
@@ -53,14 +65,64 @@
       backdrop-filter:blur(15px) saturate(1.2);
       box-shadow:var(--shadow-soft);
     }
-    main{max-width:1240px;margin:0 auto;padding:14px 14px 98px;position:relative}
-    .brandRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-    .brand{font-weight:900;font-size:21px;letter-spacing:.01em}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);
-      background:var(--glass-strong);font-size:12px;color:var(--muted);box-shadow:var(--shadow-soft);white-space:nowrap}
-    .sub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.6;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.45);box-shadow:var(--shadow-soft)}
-    .updateBanner{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--ink);background:rgba(255,255,255,.62)}
-    .updateBanner.show{display:flex !important}
+    main{
+      max-width:1240px;
+      margin:0 auto;
+      padding:14px 14px 98px;
+      position:relative;
+    }
+
+    .brandRow{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      font-weight:900;
+      font-size:21px;
+      letter-spacing:.01em;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:var(--glass-strong);
+      font-size:12px;
+      color:var(--muted);
+      box-shadow:var(--shadow-soft);
+      white-space:nowrap;
+    }
+
+    .sub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.45);
+      box-shadow:var(--shadow-soft)
+    }
+
+    .updateBanner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      color:var(--ink);
+      background:rgba(255,255,255,.62)
+    }
+
+    .updateBanner.show{
+      display:flex !important
+    }
 
     .grid{display:grid;gap:12px}
     section.grid{grid-template-columns:minmax(0,1fr)}
@@ -78,35 +140,247 @@
     .hint{font-size:12px;color:var(--muted)}
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .rowBetween{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+    .timerHero{
+      --hero-scale:1;
+      background:linear-gradient(165deg, rgba(255,179,191,.94), rgba(244,149,168,.9));
+      border:1px solid rgba(204,104,126,.34);
+      box-shadow:0 24px 52px rgba(168,87,108,.26);
+      color:#fff6f7;
+      position:relative;
+      overflow:hidden;
+    }
+    .timerHero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at 16% 10%, rgba(255,225,231,.42), transparent 52%);
+      pointer-events:none;
+    }
+    .timerHeroTop{display:flex;justify-content:space-between;align-items:center;gap:calc(8px * var(--hero-scale));position:relative;z-index:1}
+    .timerLabel{font-size:calc(12px * var(--hero-scale));letter-spacing:.12em;color:rgba(255,239,242,.82)}
+    .timerHeroStatus{font-size:calc(12px * var(--hero-scale));color:rgba(255,239,242,.82)}
+    .timerFlip,.focusClock{
+      --clock-scale:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:nowrap;
+      position:relative;
+      z-index:1;
+      max-width:100%;
+    }
+    .timerFlip{margin-top:calc(12px * var(--hero-scale));gap:calc(10px * var(--clock-scale))}
+    .focusClock{gap:calc(14px * var(--clock-scale))}
+    .timerFlip .flipPair,.focusClock .flipPair{display:flex;gap:calc(8px * var(--clock-scale))}
+    .flipDigit{
+      aspect-ratio:3/4;
+      border:1px solid rgba(253,217,224,.55);
+      background:linear-gradient(180deg, rgba(255,241,244,.98), rgba(255,219,227,.95));
+      box-shadow:inset 0 1px 0 rgba(255,253,254,.78), 0 10px 20px rgba(170,96,118,.24);
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      color:#6f3343;
+      text-shadow:0 1px 0 rgba(255,248,250,.78);
+      font-variant-numeric:tabular-nums;
+      transform-style:preserve-3d;
+      backface-visibility:hidden;
+    }
+    .timerFlip .flipDigit{
+      width:calc(82px * var(--clock-scale));
+      border-radius:calc(16px * var(--clock-scale));
+      font-size:calc(46px * var(--clock-scale));
+    }
+    .focusClock .flipDigit{
+      width:calc(170px * var(--clock-scale));
+      border-radius:calc(24px * var(--clock-scale));
+      font-size:calc(108px * var(--clock-scale));
+    }
+    .flipDigit::after{
+      content:"";
+      position:absolute;
+      left:calc(8px * var(--clock-scale)); right:calc(8px * var(--clock-scale)); top:50%;
+      border-top:1px solid rgba(255,245,248,.72);
+      border-bottom:1px solid rgba(180,102,123,.28);
+    }
+    .timerFlip .flipSep{
+      font-size:calc(44px * var(--clock-scale));
+      line-height:1;
+      color:rgba(255,229,235,.86);
+      font-weight:800;
+      transform:translateY(calc(-4px * var(--clock-scale)));
+    }
+    .focusClock .flipSep{
+      font-size:calc(92px * var(--clock-scale));
+      line-height:1;
+      color:rgba(255,229,235,.86);
+      font-weight:800;
+      transform:translateY(calc(-8px * var(--clock-scale)));
+    }
+    .flipDigit.flipAnim{animation:flipPulse .42s ease}
+    @keyframes flipPulse{
+      0%{transform:rotateX(0deg)}
+      40%{transform:rotateX(-16deg)}
+      100%{transform:rotateX(0deg)}
+    }
+    .timerHeroActions{margin-top:calc(14px * var(--hero-scale));display:flex;justify-content:center;position:relative;z-index:1}
+    .timerHeroActions .focusBtn{
+      min-height:calc(40px * var(--hero-scale));
+      padding:calc(10px * var(--hero-scale)) calc(12px * var(--hero-scale));
+      border-radius:calc(14px * var(--hero-scale));
+      font-size:calc(16px * var(--hero-scale));
+    }
+    .focusBtn{
+      border-color:rgba(255,216,225,.62);
+      background:rgba(255,235,240,.28);
+      color:#fff6f8;
+      box-shadow:inset 0 1px 0 rgba(255,247,249,.45);
+    }
+    .focusBtn:hover{background:rgba(255,238,242,.4)}
+
+    .focusOverlay{
+      --focus-scale:1;
+      position:fixed;
+      inset:0;
+      z-index:180;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:linear-gradient(160deg, #ffb3bf 0%, #f197ac 38%, #e07b95 100%);
+      color:#fff6f7;
+    }
+    .focusOverlay.show{display:flex}
+    .focusContent{width:min(1200px,100%);max-height:100%;display:grid;gap:calc(22px * var(--focus-scale));justify-items:center}
+    .focusHint{font-size:calc(12px * var(--focus-scale));letter-spacing:.08em;color:rgba(255,236,241,.8)}
+    .focusControls{
+      display:flex; gap:calc(10px * var(--focus-scale)); flex-wrap:wrap; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .25s ease;
+    }
+    .focusOverlay.controlsVisible .focusControls{opacity:1;pointer-events:auto}
+    .focusControls .btn{
+      min-height:calc(46px * var(--focus-scale));
+      padding:calc(12px * var(--focus-scale)) calc(14px * var(--focus-scale));
+      border-radius:calc(16px * var(--focus-scale));
+      font-size:calc(16px * var(--focus-scale));
+    }
+    .focusTip{font-size:calc(12px * var(--focus-scale));color:rgba(255,236,241,.8)}
+
+    .autoStopRow{align-items:end;gap:12px}
+    .autoStopToggle{white-space:nowrap}
+    .autoStopMinutesWrap{width:170px;max-width:100%}
+
+    @media (max-width: 720px){
+      .autoStopRow{align-items:stretch;gap:8px}
+      .autoStopToggle{width:100%}
+      .autoStopMinutesWrap{width:100%}
+      .timerHero{padding:10px}
+      .timerHeroActions .focusBtn{
+        padding:calc(8px * var(--hero-scale)) calc(10px * var(--hero-scale));
+        font-size:calc(14px * var(--hero-scale));
+      }
+      .focusControls{max-width:340px}
+    }
+    @media (orientation: portrait) and (max-width: 900px){
+      .focusTip::before{content:"建議橫向使用沉靜模式 · ";}
+    }
+
     label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
     input,select,textarea{
-      width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.8);
-      font-family:var(--font);outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.8);
+      font-family:var(--font);
+      outline:none;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.4)
     }
+
     textarea{min-height:88px;resize:vertical}
-    input:focus,select:focus,textarea:focus{border-color:rgba(223,173,186,.86);box-shadow:0 0 0 4px rgba(223,173,186,.18)}
-    .btn{
-      min-height:var(--tap);padding:12px 14px;border-radius:16px;border:1px solid rgba(223,173,186,.5);
-      background:linear-gradient(180deg, rgba(223,173,186,.36), rgba(223,173,186,.14));
-      color:var(--ink);font-weight:900;cursor:pointer;box-shadow:var(--shadow-soft)
+
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(223,173,186,.86);
+      box-shadow:0 0 0 4px rgba(223,173,186,.18)
     }
-    .btn.secondary{border-color:var(--line);background:rgba(255,255,255,.82)}
-    .btn.danger{border-color:rgba(203,136,136,.45);background:linear-gradient(180deg, rgba(203,136,136,.2), rgba(203,136,136,.08));color:#65393b}
-    .btn.small{min-height:40px;padding:10px 12px;border-radius:14px;font-weight:800}
+
+    .btn{
+      min-height:var(--tap);
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(223,173,186,.5);
+      background:linear-gradient(180deg, rgba(223,173,186,.36), rgba(223,173,186,.14));
+      color:var(--ink);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:var(--shadow-soft)
+    }
+
+    .btn.secondary{
+      border-color:var(--line);
+      background:rgba(255,255,255,.82)
+    }
+
+    .btn.danger{
+      border-color:rgba(203,136,136,.45);
+      background:linear-gradient(180deg, rgba(203,136,136,.2), rgba(203,136,136,.08));
+      color:#65393b
+    }
+
+    .btn.small{
+      min-height:40px;
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:800
+    }
+
     .btn:disabled{opacity:.55;cursor:not-allowed}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(255,255,255,.8);font-size:12px;color:var(--muted)}
-    .kpi{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px;border-radius:16px;
-      background:linear-gradient(145deg, rgba(244,217,229,.46), rgba(255,255,255,.56)); border:1px solid rgba(223,173,186,.28)}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.8);
+      font-size:12px;
+      color:var(--muted)
+    }
+
+    .kpi{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px;
+      border-radius:16px;
+      background:linear-gradient(145deg, rgba(244,217,229,.46), rgba(255,255,255,.56));
+      border:1px solid rgba(223,173,186,.28)
+    }
     .kpi .big{font-size:22px;font-weight:900}
     .kpi .small{font-size:12px;color:var(--muted)}
+
     .list{display:grid;gap:10px}
-    .item{padding:12px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.8);box-shadow:var(--shadow-soft)}
+.item{
+  padding:12px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.8);
+  box-shadow:var(--shadow-soft)
+}
     .itemTitle{display:flex;align-items:center;justify-content:space-between;gap:10px}
     .meta{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.5}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
     .chipTag{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;border:1px solid var(--line);
-      background:rgba(255,255,255,.82);font-size:12px;color:var(--muted);white-space:nowrap}
+      background:rgba(255,255,255,.82);
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap
+    }
     .cover{width:44px;height:58px;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.06);background:rgba(240,221,230,.65);flex:0 0 auto}
     .cover img{width:100%;height:100%;object-fit:cover}
     .dot{width:10px;height:10px;border-radius:4px;border:1px solid rgba(0,0,0,.06);display:inline-block}
@@ -114,12 +388,39 @@
     .star{cursor:pointer;font-size:18px;user-select:none}
 
     .tabs{
-      position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:50;width:min(1020px, calc(100% - 16px));
-      background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:10px;
-      display:grid;grid-template-columns:repeat(5,1fr);gap:10px;backdrop-filter:blur(16px)
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:10px;
+      z-index:50;
+      width:min(1020px, calc(100% - 16px));
+      background:rgba(255,255,255,.7);
+      border:1px solid var(--line);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:10px;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:10px;
+      backdrop-filter:blur(16px)
     }
-    .tabBtn{border:1px solid var(--line);background:rgba(255,248,247,.86);border-radius:18px;padding:10px 8px;min-height:58px;cursor:pointer;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-weight:900;user-select:none}
+
+    .tabBtn{
+      border:1px solid var(--line);
+      background:rgba(255,248,247,.86);
+      border-radius:18px;
+      padding:10px 8px;
+      min-height:58px;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      color:var(--muted);
+      font-weight:900;
+      user-select:none
+    }
     .tabBtn strong{font-size:13px}
     .tabBtn span{font-size:16px}
     .tabBtn.active{
@@ -128,20 +429,100 @@
       color:var(--ink);
     }
 
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;z-index:100;background:rgba(58,49,53,.93);color:#fff;
-      padding:10px 12px;border-radius:14px;max-width:min(640px, calc(100% - 26px));font-size:13px;box-shadow:var(--shadow);
-      opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-    .modalMask{position:fixed;inset:0;background:rgba(45,38,41,.35);display:none;z-index:120;padding:18px 16px}
-    .modal{max-width:760px;margin:0 auto;background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(18px)}
-    .modalHead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,246,250,.8)}
-    .modalBody{padding:14px;max-height:calc(86vh - 80px);overflow:auto}
+    .toast{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:92px;
+      z-index:100;
+      background:rgba(58,49,53,.93);
+      color:#fff;
+      padding:10px 12px;
+      border-radius:14px;
+      max-width:min(640px, calc(100% - 26px));
+      font-size:13px;
+      box-shadow:var(--shadow);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease
+    }
 
-    .progress{height:12px;border-radius:999px;background:rgba(240,221,230,.75);overflow:hidden;border:1px solid var(--line)}
-    .progress>div{height:100%;width:0%;background:linear-gradient(90deg, rgba(223,173,186,.92), rgba(200,155,141,.84));border-radius:999px}
-    canvas{width:100%;height:300px;border-radius:16px;background:rgba(255,255,255,.76);border:1px solid var(--line)}
-    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px}
-    .calCell{border:1px solid var(--line);background:rgba(255,255,255,.84);border-radius:14px;padding:8px;min-height:68px;cursor:pointer}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+    .modalMask{
+      position:fixed;
+      inset:0;
+      background:rgba(45,38,41,.35);
+      display:none;
+      z-index:120;
+      padding:18px 16px
+    }
+
+    .modal{
+      max-width:760px;
+      margin:0 auto;
+      background:rgba(255,255,255,.88);
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      backdrop-filter:blur(18px)
+    }
+
+    .modalHead{
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background:rgba(255,246,250,.8)
+    }
+
+    .modalBody{
+      padding:14px;
+      max-height:calc(86vh - 80px);
+      overflow:auto
+    }
+
+    .progress{
+      height:12px;
+      border-radius:999px;
+      background:rgba(240,221,230,.75);
+      overflow:hidden;
+      border:1px solid var(--line)
+    }
+
+    .progress>div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(223,173,186,.92), rgba(200,155,141,.84));
+      border-radius:999px
+    }
+
+    canvas{
+      width:100%;
+      height:300px;
+      border-radius:16px;
+      background:rgba(255,255,255,.76);
+      border:1px solid var(--line)
+    }
+
+    .calendar{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:8px;
+      margin-top:10px
+    }
+
+    .calCell{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.84);
+      border-radius:14px;
+      padding:8px;
+      min-height:68px;
+      cursor:pointer
+    }
     .calCell .d{font-size:12px;color:var(--muted);font-weight:900}
     .dots{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
     .topRightTest{position:absolute;right:14px;top:8px;z-index:20}
@@ -164,8 +545,16 @@
       padding:8px 0;
       touch-action:pan-y;
     }
-    .detailTrack{display:flex;align-items:stretch;transition:transform .28s ease}
-    .detailSlide{flex:0 0 100%;padding:0 10%}
+.detailTrack{
+  display:flex;
+  align-items:stretch;
+  transition:transform .28s ease
+}
+
+.detailSlide{
+  flex:0 0 100%;
+  padding:0 10%
+}
     .detailPeek{
       position:absolute;
       top:50%;
@@ -186,22 +575,63 @@
       font-size:12px;
       overflow:hidden;
     }
-    .detailPeek.left{left:-5%}
-    .detailPeek.right{right:-5%}
-    .detailCover{width:min(220px,45vw);aspect-ratio:3/4;border-radius:18px;border:1px solid var(--line);overflow:hidden;background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(216,196,232,.4));display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:800;letter-spacing:.04em}
-    .detailCover img{width:100%;height:100%;object-fit:cover}
-    .detailBody{display:grid;gap:10px;align-content:start}
-    .detailTitle{font-size:24px;font-weight:900;line-height:1.2}
-    .detailMeta{display:flex;flex-wrap:wrap;gap:8px}
-    .detailKpi{padding:12px;border-radius:16px;border:1px solid rgba(223,173,186,.28);background:linear-gradient(145deg, rgba(244,217,229,.5), rgba(255,255,255,.7))}
-    .detailKpi .big{font-size:28px;font-weight:900}
-    .detailColor{width:18px;height:18px;border-radius:6px;border:1px solid rgba(0,0,0,.08);display:inline-block;vertical-align:middle}
-    .detailNavBtns{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
-    .detailArrow{min-width:44px}
-    @media (prefers-reduced-motion: reduce){
-      .detailTrack{transition:none}
-    }
+.detailPeek.left{left:-5%}
+.detailPeek.right{right:-5%}
 
+.detailCover{
+  width:min(220px,45vw);
+  aspect-ratio:3/4;
+  border-radius:18px;
+  border:1px solid var(--line);
+  overflow:hidden;
+  background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(216,196,232,.4));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-weight:800;
+  letter-spacing:.04em
+}
+
+.detailCover img{width:100%;height:100%;object-fit:cover}
+
+.detailBody{display:grid;gap:10px;align-content:start}
+
+.detailTitle{font-size:24px;font-weight:900;line-height:1.2}
+
+.detailMeta{display:flex;flex-wrap:wrap;gap:8px}
+
+.detailKpi{
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(223,173,186,.28);
+  background:linear-gradient(145deg, rgba(244,217,229,.5), rgba(255,255,255,.7))
+}
+
+.detailKpi .big{font-size:28px;font-weight:900}
+
+.detailColor{
+  width:18px;
+  height:18px;
+  border-radius:6px;
+  border:1px solid rgba(0,0,0,.08);
+  display:inline-block;
+  vertical-align:middle
+}
+
+.detailNavBtns{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:10px
+}
+
+.detailArrow{min-width:44px}
+
+@media (prefers-reduced-motion: reduce){
+  .detailTrack{transition:none}
+}
     /* Masonry lists for gallery feeling */
     #bookList,#rankList{column-count:1;column-gap:10px;display:block}
     #bookList .item,#rankList .item{break-inside:avoid;display:inline-block;width:100%;margin:0 0 10px}
@@ -212,22 +642,40 @@
       header{margin:14px 22px 0}
       main{padding:14px 22px 28px;max-width:none}
       .tabs{
-        left:14px;top:14px;bottom:14px;transform:none;width:168px;grid-template-columns:1fr;grid-auto-rows:min-content;
-        align-content:start;border-radius:26px;position:fixed;padding:12px;gap:8px
+        left:14px;
+        top:14px;
+        bottom:14px;
+        transform:none;
+        width:168px;
+        grid-template-columns:1fr;
+        grid-auto-rows:min-content;
+        align-content:start;
+        border-radius:26px;
+        position:fixed;
+        padding:12px;
+        gap:8px
       }
+
       .tabBtn{min-height:64px}
+
       section.grid{grid-template-columns:repeat(12,minmax(0,1fr));}
+
       #view-today .card:nth-child(1){grid-column:span 8}
       #view-today .card:nth-child(2){grid-column:span 4}
+
       #view-books .card:nth-child(1){grid-column:span 5}
       #view-books .card:nth-child(2){grid-column:span 7}
+
       #view-logs .card:nth-child(1){grid-column:span 5}
       #view-logs .card:nth-child(2){grid-column:span 7}
+
       #view-stats .card:nth-child(1){grid-column:span 8}
       #view-stats .card:nth-child(2){grid-column:span 4}
       #view-stats .card:nth-child(3){grid-column:span 12}
+
       #view-rank .card:nth-child(1){grid-column:span 5}
       #view-rank .card:nth-child(2){grid-column:span 7}
+
       #view-book-detail .card{grid-column:span 12}
       #bookList,#rankList{column-count:2;column-gap:12px}
     }
@@ -281,15 +729,35 @@
             <input id="todayDate" type="date" />
           </div>
         </div>
-        <div class="row" style="margin-top:10px;">
+        <div class="card timerHero" style="margin-top:10px;">
+          <div class="timerHeroTop">
+            <div class="timerLabel">READING CEREMONY TIMER</div>
+            <div class="timerHeroStatus" id="timerStatusText">尚未開始</div>
+          </div>
+          <div class="timerFlip" id="timerFlip"></div>
+          <div class="timerHeroActions">
+            <button class="btn secondary small focusBtn" id="btnFocusMode">🪞 進入全螢幕沉靜模式</button>
+          </div>
+          <div style="display:none;" id="timerText">00:00:00</div>
+        </div>
+        <div class="row autoStopRow" style="margin-top:10px;align-items:end;">
+          <label class="autoStopToggle" style="display:flex;align-items:center;gap:8px;margin:0;">
+            <input id="todayAutoStopEnabled" type="checkbox" style="width:auto;" checked />
+            <span>到點自動存檔</span>
+          </label>
+          <div class="autoStopMinutesWrap" style="width:170px;">
+            <label for="todayAutoStopMinutes">目標分鐘數</label>
+            <input id="todayAutoStopMinutes" type="number" min="1" max="600" step="1" value="30" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px;">
           <button class="btn" id="btnStart">▶️ 開始</button>
           <button class="btn secondary" id="btnPause" disabled>⏸ 暫停</button>
           <button class="btn secondary" id="btnStop" disabled>⏹ 結束並存檔</button>
           <button class="btn danger" id="btnResetTimer">↺ 計時歸零</button>
         </div>
-        <div class="rowBetween" style="margin-top:10px;">
-          <div class="pill">⏱️ <strong id="timerText">00:00:00</strong></div>
-          <button class="btn secondary small" id="btnManualToday">✍️ 手動新增（幾點到幾點）</button>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn secondary" id="btnManualToday">✍️ 手動新增（幾點到幾點）</button>
         </div>
       </div>
 
@@ -506,12 +974,31 @@
     </div>
   </div>
 
+  <div class="focusOverlay" id="focusOverlay">
+    <div class="focusContent">
+      <div class="focusHint">沉靜閱讀模式</div>
+      <div class="focusClock" id="focusTimerFlip"></div>
+      <div class="focusControls" id="focusControls">
+        <button class="btn" id="btnFocusStart">▶️ 開始</button>
+        <button class="btn secondary" id="btnFocusPause">⏸ 暫停</button>
+        <button class="btn secondary" id="btnFocusStop">⏹ 結束並存檔</button>
+        <button class="btn secondary" id="btnExitFocus">↩︎ 離開沉靜模式</button>
+      </div>
+      <div class="focusTip">點擊畫面可顯示控制按鈕，稍後會自動淡出。</div>
+    </div>
+  </div>
+
 <script>
 /* =========================
    Utilities
 ========================= */
 const $ = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const APP_BUILD_VERSION=(document.querySelector('meta[name="app-build"]')?.content||"dev").trim();
+function assetWithBuild(path){
+  const joiner=path.includes("?")?"&":"?";
+  return `${path}${joiner}v=${encodeURIComponent(APP_BUILD_VERSION)}`;
+}
 function toast(msg){
   const el=$("#toast");
   el.textContent=msg;
@@ -607,7 +1094,7 @@ function renderQuoteBanner(){
 /* =========================
    Storage (IDB + LS fallback)
 ========================= */
-const APP_VER="3.1";
+const APP_VER="3.2";
 const DB_NAME="reading_timer_pwa_v3"; const DB_VERSION=1;
 let db=null; let storageMode="ls";
 const LS_KEYS={
@@ -759,11 +1246,94 @@ $("#tabs").addEventListener("click",(e)=>{ const btn=e.target.closest(".tabBtn")
 /* =========================
    Timer
 ========================= */
-let timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null};
+const DEFAULT_AUTO_STOP_MINUTES=30;
+let timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null,autoStopEnabled:true,autoStopMinutes:DEFAULT_AUTO_STOP_MINUTES};
 let tickT=null;
-function loadTimer(){ const saved=lsLoad(LS_KEYS.timer,null); if(saved&&typeof saved==="object") timerState=saved; }
+let lastTimerHMS="00:00:00";
+let focusControlTimer=null;
+let autoStopPending=false;
+const flipCache=new WeakMap();
+const TIMER_CLOCK_BASE_WIDTH=644;
+const FOCUS_CLOCK_BASE_WIDTH=1302;
+const FOCUS_LAYOUT_BASE_HEIGHT=348;
+const resizeObserver=(typeof ResizeObserver!=='undefined')?new ResizeObserver(()=>{ requestAnimationFrame(updateFlipResponsiveScales); }):null;
+function clampScale(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function setScale(el, name, value){ if(el) el.style.setProperty(name, String(value)); }
+function updateFlipResponsiveScales(){
+  const hero=document.querySelector('#view-today .timerHero');
+  const timerFlip=$("#timerFlip");
+  if(hero&&timerFlip){
+    const cs=getComputedStyle(hero);
+    const padX=parseFloat(cs.paddingLeft||0)+parseFloat(cs.paddingRight||0);
+    const availW=Math.max(220, hero.clientWidth-padX-2);
+    const widthScale=availW/TIMER_CLOCK_BASE_WIDTH;
+    const heightScale=(window.innerHeight*0.34)/220;
+    let heroScale=clampScale(Math.min(widthScale,heightScale),0.48,1);
+    setScale(hero,'--hero-scale',heroScale.toFixed(3));
+    setScale(timerFlip,'--clock-scale',heroScale.toFixed(3));
+
+    const overflowRatio=timerFlip.scrollWidth/Math.max(1,timerFlip.clientWidth);
+    if(overflowRatio>1){
+      heroScale=clampScale(heroScale/overflowRatio,0.42,1);
+      setScale(hero,'--hero-scale',heroScale.toFixed(3));
+      setScale(timerFlip,'--clock-scale',heroScale.toFixed(3));
+    }
+  }
+  const ov=$("#focusOverlay");
+  const focusClock=$("#focusTimerFlip");
+  if(ov&&focusClock){
+    const availW=Math.max(320, ov.clientWidth-40);
+    const availH=Math.max(220, ov.clientHeight-40);
+    const focusScale=clampScale(Math.min(availW/FOCUS_CLOCK_BASE_WIDTH, availH/FOCUS_LAYOUT_BASE_HEIGHT),0.34,1);
+    setScale(ov,'--focus-scale',focusScale.toFixed(3));
+    setScale(focusClock,'--clock-scale',focusScale.toFixed(3));
+  }
+}
+function normalizeAutoStopMinutes(v){ return clamp(Math.round(Number(v)||DEFAULT_AUTO_STOP_MINUTES),1,600); }
+function getAutoStopPrefs(){
+  const enabled=state.meta.autoStopEnabled!==false;
+  const minutes=normalizeAutoStopMinutes(state.meta.autoStopMinutes);
+  return {enabled,minutes};
+}
+function applyAutoStopPrefsToUI(){
+  const {enabled,minutes}=getAutoStopPrefs();
+  if($("#todayAutoStopEnabled")) $("#todayAutoStopEnabled").checked=enabled;
+  if($("#todayAutoStopMinutes")) $("#todayAutoStopMinutes").value=String(minutes);
+}
+function syncRunningAutoStopFromUI(){
+  if(!timerState.startTs) return;
+  timerState.autoStopEnabled=!!$("#todayAutoStopEnabled")?.checked;
+  timerState.autoStopMinutes=normalizeAutoStopMinutes($("#todayAutoStopMinutes")?.value);
+  saveTimer();
+}
+async function persistAutoStopPrefs(){
+  const enabled=!!$("#todayAutoStopEnabled")?.checked;
+  const minutes=normalizeAutoStopMinutes($("#todayAutoStopMinutes")?.value);
+  state.meta.autoStopEnabled=enabled;
+  state.meta.autoStopMinutes=minutes;
+  await setMeta("autoStopEnabled",enabled);
+  await setMeta("autoStopMinutes",minutes);
+  if($("#todayAutoStopMinutes")) $("#todayAutoStopMinutes").value=String(minutes);
+  syncRunningAutoStopFromUI();
+}
+function loadTimer(){
+  const saved=lsLoad(LS_KEYS.timer,null);
+  if(saved&&typeof saved==="object"){
+    timerState={...timerState,...saved};
+    timerState.autoStopEnabled=saved.autoStopEnabled!==false;
+    timerState.autoStopMinutes=normalizeAutoStopMinutes(saved.autoStopMinutes);
+  }else{
+    const pref=getAutoStopPrefs();
+    timerState.autoStopEnabled=pref.enabled;
+    timerState.autoStopMinutes=pref.minutes;
+  }
+}
 function saveTimer(){ lsSave(LS_KEYS.timer,timerState); }
-function clearTimer(){ timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null}; lsSave(LS_KEYS.timer,null); }
+function clearTimer(){
+  const pref=getAutoStopPrefs();
+  timerState={running:false,startTs:null,pauseAccum:0,pausedAt:null,bookId:null,date:null,autoStopEnabled:pref.enabled,autoStopMinutes:pref.minutes};
+  lsSave(LS_KEYS.timer,null);
+}
 function elapsedMs(){
   if(!timerState.startTs) return 0;
   const now=Date.now();
@@ -777,34 +1347,99 @@ function fmtHMS(ms){
   const ss=String(s%60).padStart(2,"0");
   return `${hh}:${mm}:${ss}`;
 }
-function updateTimerUI(){ $("#timerText").textContent=fmtHMS(elapsedMs()); }
+function buildFlipClock(root){
+  if(!root) return;
+  root.innerHTML='';
+  const parts=[['h1','h2'],['m1','m2'],['s1','s2']];
+  parts.forEach((group,idx)=>{
+    const pair=document.createElement('div');
+    pair.className='flipPair';
+    group.forEach(name=>{
+      const d=document.createElement('div');
+      d.className='flipDigit';
+      d.dataset.digit=name;
+      d.textContent='0';
+      pair.appendChild(d);
+    });
+    root.appendChild(pair);
+    if(idx<2){ const sep=document.createElement('div'); sep.className='flipSep'; sep.textContent=':'; root.appendChild(sep); }
+  });
+  flipCache.set(root, Object.fromEntries(Array.from(root.querySelectorAll('.flipDigit')).map(el=>[el.dataset.digit, el])));
+}
+function getFlipDigits(root){
+  if(!flipCache.has(root)){
+    const map=Object.fromEntries(Array.from(root.querySelectorAll('.flipDigit')).map(el=>[el.dataset.digit, el]));
+    flipCache.set(root,map);
+  }
+  return flipCache.get(root);
+}
+function applyFlip(root,hms){
+  if(!root) return;
+  const [hh,mm,ss]=hms.split(':');
+  const next={h1:hh[0],h2:hh[1],m1:mm[0],m2:mm[1],s1:ss[0],s2:ss[1]};
+  const digits=getFlipDigits(root);
+  Object.entries(next).forEach(([k,v])=>{
+    const el=digits[k]; if(!el) return;
+    if(el.textContent!==v){
+      el.textContent=v;
+      el.classList.remove('flipAnim');
+      void el.offsetWidth;
+      el.classList.add('flipAnim');
+    }
+  });
+}
+function maybeAutoStop(ms){
+  if(autoStopPending||!timerState.running||!timerState.autoStopEnabled) return;
+  const targetMs=normalizeAutoStopMinutes(timerState.autoStopMinutes)*60000;
+  if(ms>=targetMs){
+    autoStopPending=true;
+    toast(`已達 ${normalizeAutoStopMinutes(timerState.autoStopMinutes)} 分鐘，自動存檔`);
+    runStop().finally(()=>{ autoStopPending=false; });
+  }
+}
+function updateTimerUI(){
+  const ms=elapsedMs();
+  const hms=fmtHMS(ms);
+  $("#timerText").textContent=hms;
+  applyFlip($("#timerFlip"), hms);
+  applyFlip($("#focusTimerFlip"), hms);
+  if(hms!==lastTimerHMS) lastTimerHMS=hms;
+  const st=$("#timerStatusText");
+  if(st) st.textContent=timerState.running?"正在專注閱讀":(timerState.startTs?"已暫停":"尚未開始");
+  maybeAutoStop(ms);
+}
 function startTick(){ clearInterval(tickT); tickT=setInterval(updateTimerUI,250); }
 function syncTimerButtons(){
   const hasBook=!!$("#todayBook").value;
-  $("#btnStart").disabled=!hasBook||timerState.running;
-  $("#btnPause").disabled=!timerState.running;
-  $("#btnStop").disabled=!timerState.startTs;
+  const startDisabled=!hasBook||timerState.running;
+  const pauseDisabled=!timerState.running;
+  const stopDisabled=!timerState.startTs;
+  $("#btnStart").disabled=startDisabled;
+  $("#btnPause").disabled=pauseDisabled;
+  $("#btnStop").disabled=stopDisabled;
+  $("#btnFocusStart").disabled=startDisabled;
+  $("#btnFocusPause").disabled=pauseDisabled;
+  $("#btnFocusStop").disabled=stopDisabled;
 }
-
-$("#btnStart").addEventListener("click",()=>{
+function runStart(){
   const bookId=Number($("#todayBook").value);
   if(!bookId){ toast("先選一本書"); return; }
   const date=$("#todayDate").value||toISODate(new Date());
   if(!timerState.startTs||timerState.bookId!==bookId||timerState.date!==date){
-    timerState={running:true,startTs:Date.now(),pauseAccum:0,pausedAt:null,bookId,date};
+    timerState={running:true,startTs:Date.now(),pauseAccum:0,pausedAt:null,bookId,date,autoStopEnabled:!!$("#todayAutoStopEnabled")?.checked,autoStopMinutes:normalizeAutoStopMinutes($("#todayAutoStopMinutes")?.value)};
   }else if(!timerState.running){
     timerState.running=true;
     timerState.pauseAccum+=(Date.now()-timerState.pausedAt);
     timerState.pausedAt=null;
   }
   saveTimer(); startTick(); updateTimerUI(); syncTimerButtons(); toast("開始計時");
-});
-$("#btnPause").addEventListener("click",()=>{
+}
+function runPause(){
   if(!timerState.running) return;
   timerState.running=false; timerState.pausedAt=Date.now();
-  saveTimer(); syncTimerButtons(); toast("已暫停");
-});
-$("#btnStop").addEventListener("click",async ()=>{
+  saveTimer(); syncTimerButtons(); updateTimerUI(); toast("已暫停");
+}
+async function runStop(){
   if(!timerState.startTs) return;
   const ms=elapsedMs();
   const minutes=Math.max(1,Math.round(ms/60000));
@@ -821,6 +1456,45 @@ $("#btnStop").addEventListener("click",async ()=>{
   });
   await saveAll(); clearTimer(); updateTimerUI(); syncTimerButtons(); toast("已存檔");
   renderToday(); if(state.view==="stats") renderStats();
+}
+function showFocusControls(){
+  const ov=$("#focusOverlay");
+  if(!ov.classList.contains('show')) return;
+  ov.classList.add('controlsVisible');
+  clearTimeout(focusControlTimer);
+  focusControlTimer=setTimeout(()=>ov.classList.remove('controlsVisible'),2200);
+}
+async function openFocusMode(){
+  const ov=$("#focusOverlay");
+  ov.classList.add('show');
+  updateFlipResponsiveScales();
+  showFocusControls();
+  try{
+    if(document.fullscreenElement!==ov && ov.requestFullscreen) await ov.requestFullscreen();
+  }catch(e){ console.warn('fullscreen unavailable',e); }
+}
+async function closeFocusMode(){
+  const ov=$("#focusOverlay");
+  ov.classList.remove('show','controlsVisible');
+  clearTimeout(focusControlTimer);
+  try{
+    if(document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+  }catch(e){ console.warn('exit fullscreen failed',e); }
+}
+$("#btnStart").addEventListener("click",runStart);
+$("#btnPause").addEventListener("click",runPause);
+$("#btnStop").addEventListener("click",runStop);
+$("#btnFocusStart").addEventListener("click",runStart);
+$("#btnFocusPause").addEventListener("click",runPause);
+$("#btnFocusStop").addEventListener("click",runStop);
+$("#btnFocusMode").addEventListener("click",openFocusMode);
+$("#btnExitFocus").addEventListener("click",closeFocusMode);
+$("#todayAutoStopEnabled")?.addEventListener("change",()=>{ persistAutoStopPrefs(); });
+$("#todayAutoStopMinutes")?.addEventListener("change",()=>{ persistAutoStopPrefs(); });
+$("#todayAutoStopMinutes")?.addEventListener("blur",()=>{ persistAutoStopPrefs(); });
+$("#focusOverlay").addEventListener("click",(e)=>{
+  if(e.target.closest('.focusControls')) return;
+  showFocusControls();
 });
 $("#btnResetTimer").addEventListener("click",()=>{
   if(!timerState.startTs && fmtHMS(elapsedMs())==="00:00:00"){
@@ -832,6 +1506,26 @@ $("#btnResetTimer").addEventListener("click",()=>{
   syncTimerButtons();
   toast("已歸零（未存檔）");
 });
+
+document.addEventListener('fullscreenchange',()=>{
+  const ov=$("#focusOverlay");
+  if(!document.fullscreenElement && ov.classList.contains('show')) ov.classList.remove('show','controlsVisible');
+  updateFlipResponsiveScales();
+});
+
+buildFlipClock($("#timerFlip"));
+buildFlipClock($("#focusTimerFlip"));
+updateFlipResponsiveScales();
+
+window.addEventListener('resize', updateFlipResponsiveScales);
+window.addEventListener('orientationchange', updateFlipResponsiveScales);
+
+if(resizeObserver){
+  const hero=document.querySelector('#view-today .timerHero');
+  const focusContent=document.querySelector('#focusOverlay .focusContent');
+  if(hero) resizeObserver.observe(hero);
+  if(focusContent) resizeObserver.observe(focusContent);
+}
 
 /* Manual session (time range) */
 function openManualSessionModal(dateStr){
@@ -925,6 +1619,7 @@ function renderToday(){
     });
   });
 
+  applyAutoStopPrefsToUI();
   loadTimer(); updateTimerUI(); syncTimerButtons();
 }
 
@@ -1855,6 +2550,8 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
   const sf=state.meta.stackFilter; if(sf) state.stackFilter=sf;
   const sel=state.meta.selectedBooks; if(Array.isArray(sel)) state.selectedBooks=sel;
   const goal=state.meta.monthlyGoalHours; if(goal!==undefined) $("#monthlyGoal").value=String(goal);
+  if(state.meta.autoStopEnabled===undefined) state.meta.autoStopEnabled=true;
+  if(state.meta.autoStopMinutes===undefined) state.meta.autoStopMinutes=DEFAULT_AUTO_STOP_MINUTES;
 
   ensureDefaultBook();
   refreshBookSelects();
@@ -1865,6 +2562,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
   $("#statsMonth").value=`${new Date().getFullYear()}-${pad2(new Date().getMonth()+1)}`;
   $("#stackFilter").value=state.stackFilter;
 
+  applyAutoStopPrefsToUI();
   loadTimer(); updateTimerUI(); syncTimerButtons();
 
   renderToday(); renderBooks(); renderLogs(); renderStats(); renderRank();
@@ -1873,12 +2571,16 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
   const isLocal=(location.hostname==="127.0.0.1"||location.hostname==="localhost");
   const SW_UPDATE_CONFIG={ autoApply:false, autoClaimClients:true };
   let swReg=null;
+
   function showAppUpdateBanner(reg, message="有新版本可用"){
     const bar=$("#updateBanner");
     if(!bar) return;
+
     const txt=$("#updateBannerText");
     if(txt) txt.textContent=message;
+
     bar.classList.add("show");
+
     const btn=$("#btnUpdateNow");
     if(btn){
       btn.disabled=false;
@@ -1911,7 +2613,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   if(!isLocal && "serviceWorker" in navigator){
     try{
-      swReg=await navigator.serviceWorker.register("./sw.js");
+swReg=await navigator.serviceWorker.register(assetWithBuild("./service-worker.js"));
       $("#btnCheckUpdate")?.addEventListener("click",()=>checkForAppUpdate(true));
 
       navigator.serviceWorker.addEventListener("controllerchange", ()=>{
