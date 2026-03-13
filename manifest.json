@@ -1,7 +1,7 @@
 {
   "name": "Hours Between Pages",
   "short_name": "Hours Between Pages",
-  "start_url": "./index.html?v=3.4",
+  "start_url": "./index.html?v=3.5",
   "display": "standalone",
   "background_color": "#FFF6FA",
   "theme_color": "#D7A0B3",

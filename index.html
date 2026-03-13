@@ -4,23 +4,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#D7A0B3" />
-  <meta name="app-build" content="2026.03.11.4" />
-  <title>Hours Between Pages</title>
-  <link rel="manifest" id="appManifest" href="./manifest.json" />
-  <script>
-    (function(){
-      const meta = document.querySelector('meta[name="app-build"]');
-      const v = meta ? meta.content : "";
-      const mf = document.getElementById('appManifest');
-      if(v && mf){
-        mf.setAttribute('href', './manifest.json?v=' + encodeURIComponent(v));
-      }
-    })();
-  </script>
-  <style>
-    :root{
-      --bg:#fff8f7;
-      --bg2:#fdeff2;
+<meta name="app-build" content="3.5" />
+<title>Hours Between Pages</title>
+<link rel="manifest" id="appManifest" href="./manifest.json" />
+<script>
+  (function(){
+    const meta = document.querySelector('meta[name="app-build"]');
+    const v = meta ? meta.content : "";
+    const mf = document.getElementById('appManifest');
+    if(v && mf){
+      mf.setAttribute('href', './manifest.json?v=' + encodeURIComponent(v));
+    }
+  })();
+</script>
+<style>
+  :root{
+    --bg:#fff8f7;
+    --bg2:#fdeff2;
       --bg-soft:#fdeff2;
       --ink:#3a2f34;
       --muted:#7f7076;
@@ -1230,36 +1230,6 @@ $("#btnResetTimer").addEventListener("click",()=>{
   toast("已歸零（未存檔）");
 });
 
-document.addEventListener('fullscreenchange',()=>{
-  const ov=$("#focusOverlay");
-  if(!document.fullscreenElement && ov.classList.contains('show')) ov.classList.remove('show','controlsVisible');
-  updateFlipResponsiveScales();
-});
-$("#btnResetTimer").addEventListener("click",()=>{
-  if(!timerState.startTs && fmtHMS(elapsedMs())==="00:00:00"){
-    toast("計時已是 00:00:00");
-    return;
-  }
-  clearTimer();
-  updateTimerUI();
-  syncTimerButtons();
-  toast("已歸零（未存檔）");
-});
-
-buildFlipClock($("#timerFlip"));
-buildFlipClock($("#focusTimerFlip"));
-updateFlipResponsiveScales();
-
-window.addEventListener('resize', updateFlipResponsiveScales);
-window.addEventListener('orientationchange', updateFlipResponsiveScales);
-
-if(resizeObserver){
-  const hero=document.querySelector('#view-today .timerHero');
-  const focusContent=document.querySelector('#focusOverlay .focusContent');
-  if(hero) resizeObserver.observe(hero);
-  if(focusContent) resizeObserver.observe(focusContent);
-}
-
 /* Manual session (time range) */
 function openManualSessionModal(dateStr){
   if(!state.books.length){ toast("請先新增書籍"); return; }
@@ -2302,7 +2272,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   // Super important: avoid Service Worker on localhost to prevent "all clicks dead" due to cached broken builds
   const isLocal=(location.hostname==="127.0.0.1"||location.hostname==="localhost");
-  const SW_UPDATE_CONFIG={ autoApply:true, autoClaimClients:true, checkIntervalMs:120000 };
+  const SW_UPDATE_CONFIG={ autoApply:false, autoClaimClients:true, checkIntervalMs:120000 };
   let swReg=null;
   function showAppUpdateBanner(reg, message="有新版本可用"){
     const bar=$("#updateBanner");
@@ -2324,6 +2294,20 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
       };
     }
   }
+  function promptForAppUpdate(reg){
+    if(!reg || !reg.waiting) return;
+    if(window.__updatePromptOpen) return;
+    window.__updatePromptOpen=true;
+    const yes=confirm("有新版本可用，是否立即更新？");
+    window.__updatePromptOpen=false;
+    if(yes){
+      reg.waiting.postMessage({type:"SKIP_WAITING"});
+      if(SW_UPDATE_CONFIG.autoClaimClients) reg.waiting.postMessage({type:"CLAIM_CLIENTS"});
+      toast("正在更新，稍候會自動重整");
+    }else{
+      showAppUpdateBanner(reg, "有新版本可用（稍後可按立即更新）");
+    }
+  }
   function hideUpdateBanner(){ const el=$("#updateBanner"); if(el) el.classList.remove("show"); }
   async function checkForAppUpdate(manual=false){
     if(!swReg) return;
@@ -2331,7 +2315,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
       await swReg.update();
       if(swReg.waiting){
         if(SW_UPDATE_CONFIG.autoApply){ swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
-        else showAppUpdateBanner(swReg, "有新版本可用");
+        else promptForAppUpdate(swReg);
       }else if(manual){
         hideUpdateBanner();
         toast("目前已是最新版本");
@@ -2354,7 +2338,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
       if(swReg.waiting){
         if(SW_UPDATE_CONFIG.autoApply){ swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
-        else showAppUpdateBanner(swReg);
+        else promptForAppUpdate(swReg);
       }
 
       swReg.addEventListener("updatefound", ()=>{
@@ -2363,7 +2347,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
         nw.addEventListener("statechange", ()=>{
           if(nw.state==="installed" && navigator.serviceWorker.controller){
             if(SW_UPDATE_CONFIG.autoApply){ if(swReg.waiting) swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients && swReg.waiting) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
-            else showAppUpdateBanner(swReg);
+            else promptForAppUpdate(swReg);
           }
         });
       });
