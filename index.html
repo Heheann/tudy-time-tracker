@@ -1315,17 +1315,17 @@ function renderToday(){
   refreshBookSelects();
   const today=toISODate(new Date());
 
-  if(timerState.startTs){
-    $("#todayDate").value=timerState.date||today;
-    if(timerState.bookId) $("#todayBook").value=String(timerState.bookId);
-  }else{
-    $("#todayDate").value=today;
+  $("#todayDate").value=today;
+  if(timerState.startTs && timerState.date!==today){
+    timerState.date=today;
+    saveTimer();
   }
+  if(timerState.bookId) $("#todayBook").value=String(timerState.bookId);
 
-  const list=sessionsOnDate($("#todayDate").value);
+  const list=sessionsOnDate(today);
   const total=list.reduce((a,s)=>a+(s.durationMinutes||0),0);
   $("#todayTotal").textContent=minutesToHM(total);
-  $("#todayScope").textContent=$("#todayDate").value;
+  $("#todayScope").textContent=today;
 
   const box=$("#todaySessions"); box.innerHTML="";
   $("#todayEmpty").style.display=list.length? "none":"block";
@@ -1589,9 +1589,7 @@ function renderBookDetail(){
   $("#btnPrevBook").onclick=()=>jumpToAdjacentBook(-1);
   $("#btnNextBook").onclick=()=>jumpToAdjacentBook(1);
   $("#btnStartThisBook").onclick=()=>{
-    const date=$("#todayDate").value||toISODate(new Date());
     showView("today");
-    $("#todayDate").value=date;
     refreshBookSelects();
     $("#todayBook").value=String(cur.id);
     syncTimerButtons();
