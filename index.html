@@ -1315,17 +1315,17 @@ function renderToday(){
   refreshBookSelects();
   const today=toISODate(new Date());
 
-  if(timerState.startTs){
-    $("#todayDate").value=timerState.date||today;
-    if(timerState.bookId) $("#todayBook").value=String(timerState.bookId);
-  }else{
-    $("#todayDate").value=today;
+  $("#todayDate").value=today;
+  if(timerState.startTs && timerState.date!==today){
+    timerState.date=today;
+    saveTimer();
   }
+  if(timerState.bookId) $("#todayBook").value=String(timerState.bookId);
 
-  const list=sessionsOnDate($("#todayDate").value);
+  const list=sessionsOnDate(today);
   const total=list.reduce((a,s)=>a+(s.durationMinutes||0),0);
   $("#todayTotal").textContent=minutesToHM(total);
-  $("#todayScope").textContent=$("#todayDate").value;
+  $("#todayScope").textContent=today;
 
   const box=$("#todaySessions"); box.innerHTML="";
   $("#todayEmpty").style.display=list.length? "none":"block";
@@ -1589,9 +1589,7 @@ function renderBookDetail(){
   $("#btnPrevBook").onclick=()=>jumpToAdjacentBook(-1);
   $("#btnNextBook").onclick=()=>jumpToAdjacentBook(1);
   $("#btnStartThisBook").onclick=()=>{
-    const date=$("#todayDate").value||toISODate(new Date());
     showView("today");
-    $("#todayDate").value=date;
     refreshBookSelects();
     $("#todayBook").value=String(cur.id);
     syncTimerButtons();
@@ -2302,7 +2300,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   // Super important: avoid Service Worker on localhost to prevent "all clicks dead" due to cached broken builds
   const isLocal=(location.hostname==="127.0.0.1"||location.hostname==="localhost");
-  const SW_UPDATE_CONFIG={ autoApply:true, autoClaimClients:true, checkIntervalMs:120000 };
+  const SW_UPDATE_CONFIG={ autoApply:false, autoClaimClients:true, checkIntervalMs:120000 };
   let swReg=null;
   function showAppUpdateBanner(reg, message="有新版本可用"){
     const bar=$("#updateBanner");
@@ -2325,20 +2323,49 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
     }
   }
   function hideUpdateBanner(){ const el=$("#updateBanner"); if(el) el.classList.remove("show"); }
+
+  function openAppUpdateModal(reg, message="有新版本可用"){
+    if(!reg || !reg.waiting) return;
+    openModal("有新版本可更新",`
+      <div class="grid">
+        <div class="hint">${escapeHTML(message)}</div>
+        <div class="card" style="margin:0;padding:12px;">
+          <div style="font-weight:900;margin-bottom:6px;">本次主要更新重點</div>
+          <ul style="margin:0;padding-left:18px;display:grid;gap:6px;">
+            <li>今日頁面的日期會自動同步為今天。</li>
+            <li>手動新增會自動帶入今天日期。</li>
+            <li>今日摘要會固定顯示今天的資料。</li>
+          </ul>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnConfirmUpdateYes">YES，立即更新</button>
+          <button class="btn secondary" id="btnConfirmUpdateNo">NO，稍後再說</button>
+        </div>
+      </div>
+    `);
+    $("#btnConfirmUpdateYes")?.addEventListener("click",()=>{
+      if(reg.waiting){
+        reg.waiting.postMessage({type:"SKIP_WAITING"});
+        if(SW_UPDATE_CONFIG.autoClaimClients) reg.waiting.postMessage({type:"CLAIM_CLIENTS"});
+      }
+      closeModal();
+    });
+    $("#btnConfirmUpdateNo")?.addEventListener("click",()=>{ closeModal(); });
+  }
   async function checkForAppUpdate(manual=false){
     if(!swReg) return;
     try{
       await swReg.update();
       if(swReg.waiting){
         if(SW_UPDATE_CONFIG.autoApply){ swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
-        else showAppUpdateBanner(swReg, "有新版本可用");
+        else openAppUpdateModal(swReg, "有新版本可用");
       }else if(manual){
         hideUpdateBanner();
         toast("目前已是最新版本");
       }
     }catch(e){ if(manual) toast("檢查更新失敗"); }
   }
-  window.__debugShowUpdateBanner=()=>showAppUpdateBanner({waiting:{postMessage:()=>{}}});
+  window.__debugShowUpdateBanner=()=>openAppUpdateModal({waiting:{postMessage:()=>{}}});
 
   if(!isLocal && "serviceWorker" in navigator){
     try{
@@ -2354,7 +2381,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
       if(swReg.waiting){
         if(SW_UPDATE_CONFIG.autoApply){ swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
-        else showAppUpdateBanner(swReg);
+        else openAppUpdateModal(swReg);
       }
 
       swReg.addEventListener("updatefound", ()=>{
@@ -2363,7 +2390,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
         nw.addEventListener("statechange", ()=>{
           if(nw.state==="installed" && navigator.serviceWorker.controller){
             if(SW_UPDATE_CONFIG.autoApply){ if(swReg.waiting) swReg.waiting.postMessage({type:"SKIP_WAITING"}); if(SW_UPDATE_CONFIG.autoClaimClients && swReg.waiting) swReg.waiting.postMessage({type:"CLAIM_CLIENTS"}); }
-            else showAppUpdateBanner(swReg);
+            else openAppUpdateModal(swReg);
           }
         });
       });
