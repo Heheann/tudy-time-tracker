@@ -11,7 +11,7 @@
     (()=>{
       const v=document.querySelector('meta[name="app-build"]')?.content;
       const mf=document.getElementById('appManifest');
-      if(v&&mf) mf.setAttribute('href',`./manifest.json?v=${encodeURIComponent(v)}`);
+      if(v&&mf) mf.setAttribute('href', `./manifest.json?v=${encodeURIComponent(v)}`);
     })();
   </script>
   <style>
@@ -754,6 +754,7 @@
           <button class="btn" id="btnStart">▶️ 開始</button>
           <button class="btn secondary" id="btnPause" disabled>⏸ 暫停</button>
           <button class="btn secondary" id="btnStop" disabled>⏹ 結束並存檔</button>
+          <button class="btn danger" id="btnResetTimer">↺ 計時歸零</button>
         </div>
         <div class="row" style="margin-top:10px;">
           <button class="btn secondary" id="btnManualToday">✍️ 手動新增（幾點到幾點）</button>
@@ -1495,16 +1496,30 @@ $("#focusOverlay").addEventListener("click",(e)=>{
   if(e.target.closest('.focusControls')) return;
   showFocusControls();
 });
+$("#btnResetTimer").addEventListener("click",()=>{
+  if(!timerState.startTs && fmtHMS(elapsedMs())==="00:00:00"){
+    toast("計時已是 00:00:00");
+    return;
+  }
+  clearTimer();
+  updateTimerUI();
+  syncTimerButtons();
+  toast("已歸零（未存檔）");
+});
+
 document.addEventListener('fullscreenchange',()=>{
   const ov=$("#focusOverlay");
   if(!document.fullscreenElement && ov.classList.contains('show')) ov.classList.remove('show','controlsVisible');
   updateFlipResponsiveScales();
 });
+
 buildFlipClock($("#timerFlip"));
 buildFlipClock($("#focusTimerFlip"));
 updateFlipResponsiveScales();
+
 window.addEventListener('resize', updateFlipResponsiveScales);
 window.addEventListener('orientationchange', updateFlipResponsiveScales);
+
 if(resizeObserver){
   const hero=document.querySelector('#view-today .timerHero');
   const focusContent=document.querySelector('#focusOverlay .focusContent');
@@ -1549,7 +1564,11 @@ function openManualSessionModal(dateStr){
     renderToday(); renderLogs(); if(state.view==="stats") renderStats();
   });
 }
-$("#btnManualToday").addEventListener("click",()=>openManualSessionModal($("#todayDate").value||toISODate(new Date())));
+$("#btnManualToday").addEventListener("click",()=>{
+  const today=toISODate(new Date());
+  $("#todayDate").value=today;
+  openManualSessionModal(today);
+});
 
 /* =========================
    Today view
@@ -1561,12 +1580,13 @@ function sessionsOnDate(date){
 }
 function renderToday(){
   refreshBookSelects();
-  const today=$("#todayDate").value||toISODate(new Date());
-  $("#todayDate").value=today;
+  const today=toISODate(new Date());
 
   if(timerState.startTs){
-    if(timerState.date) $("#todayDate").value=timerState.date;
+    $("#todayDate").value=timerState.date||today;
     if(timerState.bookId) $("#todayBook").value=String(timerState.bookId);
+  }else{
+    $("#todayDate").value=today;
   }
 
   const list=sessionsOnDate($("#todayDate").value);
@@ -2593,7 +2613,7 @@ $("#btnTest").addEventListener("click",()=>toast("✅ v3.1 full：事件正常�
 
   if(!isLocal && "serviceWorker" in navigator){
     try{
-      swReg=await navigator.serviceWorker.register(assetWithBuild("./service-worker.js"));
+swReg=await navigator.serviceWorker.register(assetWithBuild("./service-worker.js"));
       $("#btnCheckUpdate")?.addEventListener("click",()=>checkForAppUpdate(true));
 
       navigator.serviceWorker.addEventListener("controllerchange", ()=>{
