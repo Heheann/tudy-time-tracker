@@ -1,9 +1,9 @@
-const CACHE_NAME="reading-timer-pwa-v3.4-auto-update";
+const CACHE_NAME="reading-timer-pwa-v3.4-update-flow";
 const ASSETS=["./","./index.html?v=3.4","./index.html","./manifest.json","./icon-192.png","./icon-512.png"];
 
 // Controllable update strategy
 const SW_UPDATE_STRATEGY={
-  autoSkipWaiting:true,
+  autoSkipWaiting:false,
   autoClaimClients:true
 };
 
